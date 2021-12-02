@@ -1,25 +1,23 @@
 package Convene.Backend.Models;
 
-import Convene.Backend.Project.ProjectType;
+import Convene.Backend.User.AppUser;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import java.sql.Date;
+import java.util.Set;
 
 @EqualsAndHashCode
 @ToString
 public abstract class Project {
     private Long id;
-    private Long teamId;
     private String name;
     private Date initiationDate;
     private String description;
     private Long leadId;
-    private ProjectType projectType;
+    private Set<AppUser> team;
 
-    public Long getTeamId() {
-        return teamId;
-    }
+
 
     public String getName() {
         return name;
@@ -53,11 +51,4 @@ public abstract class Project {
         this.leadId = leadId;
     }
 
-    public ProjectType getProjectType() {
-        return projectType;
-    }
-
-    public void setProjectType(ProjectType projectType) {
-        this.projectType = projectType;
-    }
 }
