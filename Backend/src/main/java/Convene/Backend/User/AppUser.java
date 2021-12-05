@@ -1,17 +1,16 @@
 package Convene.Backend.User;
 
-import Convene.Backend.Models.Project;
-import Convene.Backend.Project.ProjectRole;
+import Convene.Backend.Project.SoftwareProject.SoftwareProjectRole.SoftwareProjectRole;
 import Convene.Backend.Project.SoftwareProject.SoftwareProject;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
-import org.springframework.web.bind.annotation.Mapping;
 
 import javax.persistence.*;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotNull;
 import java.util.Collection;
 import java.util.Set;
 
@@ -29,9 +28,13 @@ public class AppUser implements UserDetails {
             generator = "user_sequence"
     )
     private Long id;
+    @Email(message = "Email should be valid")
     private String email;
+    @NotNull(message = "user should have first name")
     private String firstName;
+    @NotNull(message = "user should have last name")
     private String lastName;
+    @NotNull(message = "password can't be blank")
     private String password;
     private boolean accountLocked;
     @Enumerated(EnumType.STRING)
@@ -44,19 +47,22 @@ public class AppUser implements UserDetails {
     )
     private Set<SoftwareProject> projects;
     @ManyToOne
-    @JoinColumn(name = "project_role_id", nullable = false)
-    private ProjectRole projectRole;
+    @JoinColumn(name = "project_role_id",
+    insertable = false,
+    updatable = false)
+    private SoftwareProjectRole softwareProjectRole;
 
     public AppUser(SignUpRequest signUpRequest) {
-        this.email = signUpRequest.email;
-        this.firstName = signUpRequest.firstName;
-        this.lastName = signUpRequest.lastName;
-        this.password = PasswordEncoderFactories.createDelegatingPasswordEncoder().encode(signUpRequest.password);
+        this.email = signUpRequest.getEmail();
+        this.firstName = signUpRequest.getFirstName();
+        this.lastName = signUpRequest.getLastName();
+        this.password = signUpRequest.getPassword();
         this.accountLocked = false;
-        if(signUpRequest.getJoinProject()){
+//        this.softwareProjectRole =
+        if(signUpRequest.joinProject){
             this.role = Role.PROJECT_MEMBER;
         }
-        else{
+        else {
             this.role = Role.PROJECT_ADMIN;
         }
     }
@@ -119,26 +125,19 @@ public class AppUser implements UserDetails {
         return false;
     }
 
-    @AllArgsConstructor
     @Data
     public static class SignUpRequest {
-        private String email;
         private String firstName;
         private String lastName;
+        private String email;
         private String password;
         private String confirmPassword;
-        private String projectRole;
-        private boolean joinProject;
-
-        public boolean getJoinProject(){
-            return joinProject;
-        }
+        private Boolean joinProject;
     }
-
 
     @AllArgsConstructor
     @Data
-    public class LogInRequest{
+    public class LogInRequest {
         private String email;
         private String password;
     }

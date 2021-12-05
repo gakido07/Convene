@@ -1,14 +1,12 @@
 package Convene.Backend.Security;
 
 public class AuthResponse {
-    private String email;
     private String token;
     private String message;
     private boolean locked;
 
 
-    public AuthResponse(String email, String token, boolean locked) {
-        this.email = email;
+    public AuthResponse(String token, boolean locked) {
         this.token = token;
         this.locked = locked;
         if(token.length() > 0 && !locked){
@@ -22,9 +20,6 @@ public class AuthResponse {
         }
     }
 
-    public String getEmail() {
-        return email;
-    }
 
     public String getToken() {
         return token;

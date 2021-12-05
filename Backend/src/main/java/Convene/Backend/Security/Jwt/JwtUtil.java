@@ -1,4 +1,4 @@
-package Convene.Backend.Security;
+package Convene.Backend.Security.Jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -57,7 +57,7 @@ public class JwtUtil implements Serializable {
     }
 
 
-    private String getEmailFromToken(String token){
+    public String getEmailFromToken(String token){
         return getSpecificClaimFromToken(token, Claims::getSubject);
     }
 

@@ -2,8 +2,11 @@ package Convene.Backend.Project.SoftwareProject;
 
 import Convene.Backend.Models.Project;
 import Convene.Backend.Project.ProjectType;
+import Convene.Backend.Project.SoftwareProject.SoftwareProjectRole.SoftwareProjectRole;
 import Convene.Backend.User.AppUser;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
+import org.hibernate.engine.internal.Cascade;
 
 import javax.persistence.*;
 import java.sql.Date;
@@ -11,6 +14,7 @@ import java.util.Set;
 
 @Entity
 @NoArgsConstructor
+@ToString
 public class SoftwareProject extends Project{
     @Id
     @SequenceGenerator(
@@ -26,10 +30,14 @@ public class SoftwareProject extends Project{
     private String name;
     private Date initiationDate;
     private String description;
-    private Long leadId;
     private ProjectType projectType;
     @ManyToMany(mappedBy = "projects")
     Set<AppUser> teamMembers;
+    @OneToMany
+    @JoinColumn(
+            name = "project_role_id"
+    )
+    Set<SoftwareProjectRole> projectRoles;
 
     @Override
     public String getName() {
@@ -59,16 +67,6 @@ public class SoftwareProject extends Project{
     @Override
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    @Override
-    public Long getLeadId() {
-        return leadId;
-    }
-
-    @Override
-    public void setLeadId(Long leadId) {
-        this.leadId = leadId;
     }
 
 }

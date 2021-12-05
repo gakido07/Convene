@@ -1,11 +1,11 @@
-package Convene.Backend.Project;
-import Convene.Backend.Models.Project;
+package Convene.Backend.Project.SoftwareProject.SoftwareProjectRole;
+import Convene.Backend.Project.SoftwareProject.SoftwareProject;
 import Convene.Backend.User.AppUser;
 import javax.persistence.*;
 import java.util.Set;
 
 @Entity
-public class ProjectRole {
+public class SoftwareProjectRole {
     @Id
     @SequenceGenerator(
             name = "role_sequence",
@@ -17,8 +17,13 @@ public class ProjectRole {
             generator = "role_sequence"
     )
     private Long id;
-    private Long projectId;
+    @ManyToOne
+    @JoinColumn(
+            name = "software_project_id",
+            nullable = false
+    )
+    private SoftwareProject softwareProject;
     private String role;
-    @OneToMany(mappedBy = "projectRole")
+    @OneToMany(mappedBy = "softwareProjectRole")
     private Set<AppUser> teamMembers;
 }
