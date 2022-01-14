@@ -1,4 +1,4 @@
-package Convene.Backend.Project.SoftwareProject;
+package Convene.Backend.SoftwareProject;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

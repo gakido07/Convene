@@ -1,12 +1,11 @@
-package Convene.Backend.Project.SoftwareProject;
+package Convene.Backend.SoftwareProject;
 
 import Convene.Backend.Models.Project;
-import Convene.Backend.Project.ProjectType;
-import Convene.Backend.Project.SoftwareProject.SoftwareProjectRole.SoftwareProjectRole;
+import Convene.Backend.SoftwareProject.SoftwareProjectRole.SoftwareProjectRole;
+import Convene.Backend.SoftwareProject.Sprint.Sprint;
 import Convene.Backend.User.AppUser;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.hibernate.engine.internal.Cascade;
 
 import javax.persistence.*;
 import java.sql.Date;
@@ -15,6 +14,7 @@ import java.util.Set;
 @Entity
 @NoArgsConstructor
 @ToString
+@Table(name = "software_project")
 public class SoftwareProject extends Project{
     @Id
     @SequenceGenerator(
@@ -27,17 +27,36 @@ public class SoftwareProject extends Project{
             generator = "project_sequence"
     )
     private Long id;
+
     private String name;
+
     private Date initiationDate;
+
     private String description;
+
     private ProjectType projectType;
-    @ManyToMany(mappedBy = "projects")
-    Set<AppUser> teamMembers;
-    @OneToMany
-    @JoinColumn(
-            name = "project_role_id"
+    @OneToMany(mappedBy = "softwareProject")
+    private Set<SoftwareProjectRole> roles;
+
+    @OneToMany(mappedBy = "softwareProject")
+    private Set<Sprint> sprints;
+
+    @ManyToMany
+    @JoinTable(
+            name = "project_team",
+            joinColumns = @JoinColumn(name = "project_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    Set<SoftwareProjectRole> projectRoles;
+    Set<AppUser> teamMembers;
+
+
+    //Constructor
+    public SoftwareProject(SoftwareProjectDto.CreateSoftwareProjectRequest request) {
+        this.name = request.getName();
+        this.description = request.getDescription();
+        this.projectType = request.getType();
+        this.teamMembers.add(request.getUser());
+    }
 
     @Override
     public String getName() {
@@ -69,4 +88,12 @@ public class SoftwareProject extends Project{
         this.description = description;
     }
 
+
+    public Set<AppUser> getTeamMembers() {
+        return teamMembers;
+    }
+
+    public void addTeamMember(AppUser teamMember) {
+        this.teamMembers.add(teamMember);
+    }
 }

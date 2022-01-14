@@ -28,16 +28,16 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     private JwtUtil jwtUtil;
 
     private static List<String> skipFilterUrls = Arrays.asList("" +
-            "/signUp");
+            "/sign-up/**");
 
     String email = "";
     String token = "";
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        final String requstTokenHeader = request.getHeader("Authorization");
-        if(requstTokenHeader != null && requstTokenHeader.startsWith("Bearer ")){
-            token = requstTokenHeader.substring(7);
+        final String requestTokenHeader = request.getHeader("Authorization");
+        if(requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")){
+            token = requestTokenHeader.substring(7);
             try{
                 email = jwtUtil.getEmailFromToken(token);
             }

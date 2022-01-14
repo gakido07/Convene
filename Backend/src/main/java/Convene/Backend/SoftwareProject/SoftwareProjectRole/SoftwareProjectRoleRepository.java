@@ -1,4 +1,4 @@
-package Convene.Backend.Project.SoftwareProject.SoftwareProjectRole;
+package Convene.Backend.SoftwareProject.SoftwareProjectRole;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

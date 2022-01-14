@@ -1,13 +1,11 @@
 package Convene.Backend.User;
 
-import Convene.Backend.Project.SoftwareProject.SoftwareProjectRole.SoftwareProjectRole;
-import Convene.Backend.Project.SoftwareProject.SoftwareProject;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import Convene.Backend.SoftwareProject.Issue.Issue;
+import Convene.Backend.SoftwareProject.SoftwareProject;
+import Convene.Backend.SoftwareProject.SoftwareProjectRole.SoftwareProjectRole;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
@@ -16,16 +14,17 @@ import java.util.Set;
 
 @Entity
 @NoArgsConstructor
+@Table(name = "app_user")
 public class AppUser implements UserDetails {
     @Id
     @SequenceGenerator(
-            name = "user_sequence",
-            sequenceName = "user_sequence",
+            name = "app_user_sequence",
+            sequenceName = "app_user_sequence",
             allocationSize = 1
     )
     @GeneratedValue(
             strategy = GenerationType.SEQUENCE,
-            generator = "user_sequence"
+            generator = "app_user_sequence"
     )
     private Long id;
     @Email(message = "Email should be valid")
@@ -39,32 +38,20 @@ public class AppUser implements UserDetails {
     private boolean accountLocked;
     @Enumerated(EnumType.STRING)
     private Role role;
-    @ManyToMany
-    @JoinTable(
-            name = "user_projects",
-            joinColumns = @JoinColumn(name = "app_user_id"),
-            inverseJoinColumns = @JoinColumn(name = "software_project_id")
-    )
+    @ManyToMany(mappedBy = "teamMembers")
     private Set<SoftwareProject> projects;
+    @OneToMany(mappedBy = "assignee")
+    private Set<Issue> issues;
     @ManyToOne
-    @JoinColumn(name = "project_role_id",
-    insertable = false,
-    updatable = false)
-    private SoftwareProjectRole softwareProjectRole;
+    @JoinColumn( name = "id", nullable = false, insertable = false, updatable = false)
+    private SoftwareProjectRole projectRole;
 
-    public AppUser(SignUpRequest signUpRequest) {
+    public AppUser(AppUserDto.SignUpRequest signUpRequest) {
         this.email = signUpRequest.getEmail();
         this.firstName = signUpRequest.getFirstName();
         this.lastName = signUpRequest.getLastName();
         this.password = signUpRequest.getPassword();
         this.accountLocked = false;
-//        this.softwareProjectRole =
-        if(signUpRequest.joinProject){
-            this.role = Role.PROJECT_MEMBER;
-        }
-        else {
-            this.role = Role.PROJECT_ADMIN;
-        }
     }
 
     public String getFirstName() {
@@ -124,29 +111,6 @@ public class AppUser implements UserDetails {
     public boolean isEnabled() {
         return false;
     }
-
-    @Data
-    public static class SignUpRequest {
-        private String firstName;
-        private String lastName;
-        private String email;
-        private String password;
-        private String confirmPassword;
-        private Boolean joinProject;
-    }
-
-    @AllArgsConstructor
-    @Data
-    public class LogInRequest {
-        private String email;
-        private String password;
-    }
-
-    @Data
-    public static class UserDao{
-        String email;
-    }
-
 
 }
 
