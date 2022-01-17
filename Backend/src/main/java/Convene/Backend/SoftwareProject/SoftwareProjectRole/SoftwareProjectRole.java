@@ -23,7 +23,12 @@ public class SoftwareProjectRole {
     @ManyToOne
     @JoinColumn(name = "id", nullable = false, insertable = false, updatable = false)
     private SoftwareProject softwareProject;
-    @OneToMany(mappedBy = "projectRole")
+    @ManyToMany
+    @JoinTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "role_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
     private Set<AppUser> teamMembers;
     private String role;
 }

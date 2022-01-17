@@ -1,4 +1,4 @@
-package Convene.Backend.Security.Jwt;
+package Convene.Backend.Security.Auth.Jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -15,17 +15,22 @@ import java.util.function.Function;
 
 @Component
 public class JwtUtil implements Serializable {
-    private static final long serialVersionUID = -2550185165626007488L;
 
-    public static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60;
+    public static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60 * 60;
 
     @Value("${jwt.secret}")
     private String secret;
 
     public String setTokenAttributes(Map<String, Object> claims, String subject){
+        Date iat = new Date();
+        Date exp = new Date(iat.getTime() + JWT_TOKEN_VALIDITY);
+
         return Jwts.builder()
+                .setHeaderParam("typ", "JWT")
                 .setClaims(claims)
                 .setSubject(subject)
+                .setIssuedAt(iat)
+                .setExpiration(exp)
                 .signWith(SignatureAlgorithm.HS256, secret)
                 .compact();
     }
@@ -33,11 +38,14 @@ public class JwtUtil implements Serializable {
 
     public String generateToken(UserDetails userDetails){
         Map<String, Object> claims = new HashMap<>();
+        claims.put("projects", userDetails.getAuthorities());
         return setTokenAttributes(claims, userDetails.getUsername());
     }
 
     private Claims getAllClaimsFromToken(String token){
-        return Jwts.parser().setSigningKey(secret)
+        return Jwts
+                .parser()
+                .setSigningKey(secret)
                 .parseClaimsJws(token)
                 .getBody();
     }

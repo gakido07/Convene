@@ -3,6 +3,8 @@ package Convene.Backend.User;
 import Convene.Backend.SoftwareProject.Issue.Issue;
 import Convene.Backend.SoftwareProject.SoftwareProject;
 import Convene.Backend.SoftwareProject.SoftwareProjectRole.SoftwareProjectRole;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -27,24 +29,29 @@ public class AppUser implements UserDetails {
             generator = "app_user_sequence"
     )
     private Long id;
+
     @Email(message = "Email should be valid")
     private String email;
+
     @NotNull(message = "user should have first name")
     private String firstName;
+
     @NotNull(message = "user should have last name")
     private String lastName;
+
     @NotNull(message = "password can't be blank")
     private String password;
+
     private boolean accountLocked;
-    @Enumerated(EnumType.STRING)
-    private Role role;
-    @ManyToMany(mappedBy = "teamMembers")
+
+    @Getter @ManyToMany(mappedBy = "teamMembers")
     private Set<SoftwareProject> projects;
+
     @OneToMany(mappedBy = "assignee")
     private Set<Issue> issues;
-    @ManyToOne
-    @JoinColumn( name = "id", nullable = false, insertable = false, updatable = false)
-    private SoftwareProjectRole projectRole;
+
+    @ManyToMany(mappedBy = "teamMembers")
+    private Set<SoftwareProjectRole> projectRoles;
 
     public AppUser(AppUserDto.SignUpRequest signUpRequest) {
         this.email = signUpRequest.getEmail();
@@ -53,6 +60,12 @@ public class AppUser implements UserDetails {
         this.password = signUpRequest.getPassword();
         this.accountLocked = false;
     }
+
+    public AppUser(String email, Set<SoftwareProject> projects) {
+        this.email = email;
+        this.projects = projects;
+    }
+
 
     public String getFirstName() {
         return firstName;
@@ -68,6 +81,10 @@ public class AppUser implements UserDetails {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public String getEmail() {
+        return email;
     }
 
     public void setEmail(String email) {

@@ -11,7 +11,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import java.time.LocalDate;
 
 @ControllerAdvice
-@Slf4j
+//@Slf4j
 public class AuthControllerAdvice extends ResponseEntityExceptionHandler {
     @ExceptionHandler({AuthExceptions.UserExistsException.class})
     public ResponseEntity<Object> handleUserExistsException(AuthExceptions.UserExistsException exception, WebRequest webRequest){
@@ -33,10 +33,27 @@ public class AuthControllerAdvice extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler({AuthExceptions.InvalidVerificationCodeException.class})
     public ResponseEntity<Object> handleInvalidCode(AuthExceptions.InvalidVerificationCodeException exception, WebRequest webRequest) {
-        LocalDate timeStamp = LocalDate.now();
         return new ResponseEntity<>(
                 exception.getMessage(),
                 HttpStatus.CONFLICT
+        );
+    }
+
+
+    @ExceptionHandler({AuthExceptions.AccountLockedException.class})
+    public ResponseEntity<String> handleLockedAccountException(AuthExceptions.AccountLockedException exception, WebRequest request) {
+        return new ResponseEntity<>(
+                exception.getMessage(),
+                HttpStatus.FORBIDDEN
+        );
+    }
+
+
+    @ExceptionHandler({AuthExceptions.InvalidAuthCredentialsException.class})
+    public ResponseEntity<String> handleInvalidAUthCredentials(AuthExceptions.InvalidAuthCredentialsException exception, WebRequest request) {
+        return new ResponseEntity<>(
+                exception.getMessage(),
+                HttpStatus.UNAUTHORIZED
         );
     }
 }

@@ -1,7 +1,7 @@
 package Convene.Backend.Security;
 
-import Convene.Backend.Security.Jwt.JwtAuthenticationEntryPoint;
-import Convene.Backend.Security.Jwt.JwtRequestFilter;
+import Convene.Backend.Security.Auth.Jwt.JwtAuthenticationEntryPoint;
+import Convene.Backend.Security.Auth.Jwt.JwtRequestFilter;
 import Convene.Backend.User.AppUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -13,8 +13,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
@@ -48,7 +46,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         httpSecurity
                 .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/sign-up/**")
+                .antMatchers("/auth/*")
                 .permitAll()
                 .anyRequest()
                 .authenticated()
@@ -58,8 +56,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
-
-        httpSecurity.addFilterAfter(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+        httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
 
     }

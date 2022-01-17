@@ -1,7 +1,10 @@
-package Convene.Backend.Security.Jwt;
+package Convene.Backend.Security.Auth.Jwt;
 
 import Convene.Backend.User.AppUserService;
 import io.jsonwebtoken.ExpiredJwtException;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,29 +30,37 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     @Autowired
     private JwtUtil jwtUtil;
 
-    private static List<String> skipFilterUrls = Arrays.asList("" +
-            "/sign-up/**");
 
     String email = "";
     String token = "";
 
+    private final  List<String> skipFilterUrls = Arrays.asList("/auth/*");
+
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        return skipFilterUrls.stream()
+                .anyMatch(
+                        url -> new AntPathRequestMatcher(url).matches(request)
+                );
+    }
+
+    @SneakyThrows
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        final String requestTokenHeader = request.getHeader("Authorization");
-        if(requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")){
-            token = requestTokenHeader.substring(7);
-            try{
-                email = jwtUtil.getEmailFromToken(token);
-            }
-            catch (IllegalArgumentException exception){
-                System.out.println("Unable to get Jwt Token");
-            }
-            catch (ExpiredJwtException exception){
-                System.out.println("Jwt Token expired");
-            }
+
+        token = request.getHeader("Authorization").substring(7);
+
+        //TODO write logic to authenticate based on granted authorities
+
+        try{
+            email = jwtUtil.getEmailFromToken(token);
         }
-        else{
-            logger.warn("Jwt Token does not begin with bearer");
+        catch (IllegalArgumentException exception){
+            logger.error("Unable to get jwt");
+        }
+        catch (ExpiredJwtException exception){
+            logger.warn("Token expired");
         }
 
         if(email.length() > 0 && SecurityContextHolder.getContext().getAuthentication() == null){
@@ -68,14 +79,5 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             }
         }
         filterChain.doFilter(request, response);
-    }
-
-    @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        return skipFilterUrls.stream()
-                .anyMatch(
-                        url -> new AntPathRequestMatcher(url)
-                                .matches(request)
-                );
     }
 }

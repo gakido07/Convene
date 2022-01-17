@@ -4,11 +4,14 @@ import Convene.Backend.Models.Project;
 import Convene.Backend.SoftwareProject.SoftwareProjectRole.SoftwareProjectRole;
 import Convene.Backend.SoftwareProject.Sprint.Sprint;
 import Convene.Backend.User.AppUser;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import javax.persistence.*;
 import java.sql.Date;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -26,6 +29,7 @@ public class SoftwareProject extends Project{
             strategy = GenerationType.SEQUENCE,
             generator = "project_sequence"
     )
+    @Getter
     private Long id;
 
     private String name;
@@ -35,6 +39,7 @@ public class SoftwareProject extends Project{
     private String description;
 
     private ProjectType projectType;
+
     @OneToMany(mappedBy = "softwareProject")
     private Set<SoftwareProjectRole> roles;
 
@@ -47,16 +52,19 @@ public class SoftwareProject extends Project{
             joinColumns = @JoinColumn(name = "project_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    Set<AppUser> teamMembers;
+    private Set<AppUser> teamMembers;
 
 
     //Constructor
-    public SoftwareProject(SoftwareProjectDto.CreateSoftwareProjectRequest request) {
-        this.name = request.getName();
-        this.description = request.getDescription();
-        this.projectType = request.getType();
-        this.teamMembers.add(request.getUser());
+    public SoftwareProject(String name, ProjectType type, String description, AppUser user) {
+        this.name = name;
+        this.description = description;
+        this.projectType = type;
+        this.teamMembers = new HashSet<AppUser>();
+        this.teamMembers.add(user);
     }
+
+//    public SoftwareProject(Long id, String name)
 
     @Override
     public String getName() {
@@ -88,6 +96,9 @@ public class SoftwareProject extends Project{
         this.description = description;
     }
 
+    public ProjectType getProjectType() {
+        return projectType;
+    }
 
     public Set<AppUser> getTeamMembers() {
         return teamMembers;

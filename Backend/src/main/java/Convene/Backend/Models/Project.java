@@ -13,8 +13,6 @@ public abstract class Project {
     private String name;
     private Date initiationDate;
     private String description;
-    private Set<AppUser> team;
-
 
 
     public String getName() {
