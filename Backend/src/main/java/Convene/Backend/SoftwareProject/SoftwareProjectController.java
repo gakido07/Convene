@@ -5,31 +5,28 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
-@RequestMapping("/software-project")
+@RequestMapping("{userId}/software-project")
 public class SoftwareProjectController {
 
+    private SoftwareProjectService softwareProjectService;
+
     @Autowired
-    private SoftwareProjectService service;
+    public SoftwareProjectController(SoftwareProjectService softwareProjectService) {
+        this.softwareProjectService = softwareProjectService;
+    }
 
     @PostMapping(path = "/")
-    public ResponseEntity<SoftwareProjectDto> createSoftwareProject(@RequestBody SoftwareProjectDto.CreateSoftwareProjectRequest request, @PathVariable(name = "userId") String userId) {
-        SoftwareProjectDto projectDto = service.createProject(request, Long.valueOf(userId));
-
+    public ResponseEntity<SoftwareProjectDto> createSoftwareProject(@RequestBody SoftwareProjectDto.CreateSoftwareProjectRequest request, @PathVariable(name = "userId") String userId) throws Exception {
+        SoftwareProjectDto projectDto = softwareProjectService.createProject(request, Long.valueOf(userId));
         return new ResponseEntity<>(
                 projectDto,
                 HttpStatus.ACCEPTED
         );
     }
 
-
     @GetMapping(path = "/{projectId}")
     public SoftwareProject getSoftwareProjectDetails(@PathVariable(name = "projectId") String projectId, @RequestParam String userId) {
-        return service.getSoftwareProject(Long.valueOf(projectId));
+        return softwareProjectService.findSoftwareProjectById(Long.valueOf(projectId));
     }
-
-
-
 }

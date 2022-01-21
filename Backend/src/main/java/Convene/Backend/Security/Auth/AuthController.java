@@ -1,12 +1,12 @@
 package Convene.Backend.Security.Auth;
 
 import Convene.Backend.Exception.CustomExceptions.AuthExceptions;
-import Convene.Backend.Security.EmailVerification.EmailVerification;
-import Convene.Backend.Security.EmailVerification.EmailVerificationDto;
-import Convene.Backend.Security.EmailVerification.EmailVerificationService;
+import Convene.Backend.Email.EmailVerification.EmailVerification;
+import Convene.Backend.Email.EmailVerification.EmailVerificationDto;
+import Convene.Backend.Email.EmailVerification.EmailVerificationService;
 import Convene.Backend.Security.SecurityUtil;
-import Convene.Backend.User.AppUserDto;
-import Convene.Backend.User.AppUserService;
+import Convene.Backend.AppUser.AppUserDto;
+import Convene.Backend.AppUser.AppUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,26 +14,32 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping(path = "/auth")
 public class AuthController {
 
     @Autowired
     private AppUserService appUserService;
 
     @Autowired
-    private EmailVerificationService verificationService;
+    private EmailVerificationService emailVerificationService;
 
     @Autowired
     private SecurityUtil securityUtil;
 
+
+    public AuthController(AppUserService appUserService, EmailVerificationService emailVerificationService, SecurityUtil securityUtil) {
+        this.appUserService = appUserService;
+        this.emailVerificationService = emailVerificationService;
+        this.securityUtil = securityUtil;
+    }
+
+
     @PostMapping(path = "/sign-up/email-verification")
-    public ResponseEntity<String> registerUser(@RequestBody EmailVerificationDto.EmailVerificationRequest verificationRequest) throws Exception {
-        String result = appUserService.verifyEmail(verificationRequest);
+    public ResponseEntity<String> requestVerificationEmail(@RequestBody EmailVerificationDto.EmailVerificationRequest verificationRequest) throws Exception {
+        String result = emailVerificationService.verifyEmail(verificationRequest);
         return new ResponseEntity<>(
                 result.toString(),
                 HttpStatus.resolve(200)
@@ -41,8 +47,8 @@ public class AuthController {
     }
 
     @PostMapping(path = "/sign-up/email-verification/verify-code")
-    public ResponseEntity<EmailVerification> verifyEmail(@RequestBody EmailVerificationDto.CodeValidationRequest request) throws Exception {
-       EmailVerification verificationDto = verificationService.verifyCode(request);
+    public ResponseEntity<EmailVerification> verifyCode(@RequestBody EmailVerificationDto.CodeValidationRequest request) throws Exception {
+       EmailVerification verificationDto = emailVerificationService.verifyCode(request);
 
         return new ResponseEntity<>(
                verificationDto,

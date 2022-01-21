@@ -1,4 +1,4 @@
-package Convene.Backend.Security.EmailVerification;
+package Convene.Backend.Email.EmailVerification;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

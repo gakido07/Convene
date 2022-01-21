@@ -2,12 +2,11 @@ package Convene.Backend.SoftwareProject.Issue;
 
 
 import Convene.Backend.SoftwareProject.Sprint.Sprint;
-import Convene.Backend.User.AppUser;
+import Convene.Backend.AppUser.AppUser;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.sql.Date;
 
 @Data
 @NoArgsConstructor

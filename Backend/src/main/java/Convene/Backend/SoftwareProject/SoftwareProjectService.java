@@ -1,44 +1,58 @@
 package Convene.Backend.SoftwareProject;
 
+import Convene.Backend.AppUser.AppUserService;
 import Convene.Backend.Exception.CustomExceptions.AuthExceptions;
 import Convene.Backend.Exception.CustomExceptions.SoftwareProjectExceptions;
-import Convene.Backend.User.AppUser;
-import Convene.Backend.User.AppUserRepository;
+import Convene.Backend.AppUser.AppUser;
+import Convene.Backend.SoftwareProject.SoftwareProjectRole.SoftwareProjectRole;
+import Convene.Backend.SoftwareProject.SoftwareProjectRole.SoftwareProjectRoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 @Service
-public class SoftwareProjectService {
+public class SoftwareProjectService implements SoftwareProjectServiceImpl {
+
+    private SoftwareProjectRepository softwareProjectRepository;
+
+    private AppUserService appUserService;
+
+    private SoftwareProjectRoleService softwareProjectRoleService;
 
     @Autowired
-    private SoftwareProjectRepository repository;
-
-    @Autowired
-    private AppUserRepository userRepository;
-
-    public SoftwareProject loadById(Long id) throws SoftwareProjectExceptions.SoftwareProjectNotFound {
-        return repository.findById(id).orElseThrow(
-                () -> new SoftwareProjectExceptions.SoftwareProjectNotFound());
-
+    public SoftwareProjectService(SoftwareProjectRepository softwareProjectRepository, AppUserService appUserService, SoftwareProjectRoleService softwareProjectRoleService) {
+        this.softwareProjectRepository = softwareProjectRepository;
+        this.appUserService = appUserService;
+        this.softwareProjectRoleService = softwareProjectRoleService;
     }
 
-    public SoftwareProjectDto createProject(SoftwareProjectDto.CreateSoftwareProjectRequest request, Long id) {
-        AppUser appUser = userRepository.findById(id).orElseThrow(() -> new AuthExceptions.UserNotFoundException());
+    @Override
+    public SoftwareProject findSoftwareProjectById(Long id) throws SoftwareProjectExceptions.SoftwareProjectNotFound {
+        return softwareProjectRepository.findById(id).orElseThrow(
+                SoftwareProjectExceptions.SoftwareProjectNotFound::new);
+    }
+
+    @Override
+    public SoftwareProjectDto createProject(SoftwareProjectDto.CreateSoftwareProjectRequest request, Long id) throws Exception {
+        AppUser appUser = appUserService.findAppUserById(id);
         SoftwareProject newProject = new SoftwareProject(request.getName(),  request.getType(),request.getDescription(), appUser);
-        repository.save(newProject);
-        return new SoftwareProjectDto(newProject);
-    }
+        softwareProjectRepository.save(newProject);
+        SoftwareProject project = softwareProjectRepository.findSoftwareProjectByTeamMembersContains(appUser).orElseThrow(AuthExceptions.UserNotFoundException::new);
+        SoftwareProjectRole role = new SoftwareProjectRole( "ADMIN", project)
+                .withAppUsers(Arrays.asList(appUser).stream().collect(Collectors.toSet()));
 
-    public SoftwareProject getSoftwareProject(Long id) {
-        return repository.findById(id).orElseThrow(() -> new SoftwareProjectExceptions.SoftwareProjectNotFound());
+        role.getTeamMembers();
+        System.out.println(role.getRole());
+        newProject.addRole(role);
+        System.out.println(newProject.getRoles());
+        return new SoftwareProjectDto(newProject);
     }
 
     /*TODO
     *   Write logic to create Sprints
     *   Write logic to assign issues
-    * */
+    */
 
 }

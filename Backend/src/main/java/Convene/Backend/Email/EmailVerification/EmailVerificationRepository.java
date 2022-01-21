@@ -1,4 +1,4 @@
-package Convene.Backend.Security.EmailVerification;
+package Convene.Backend.Email.EmailVerification;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

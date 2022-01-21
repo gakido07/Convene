@@ -1,4 +1,4 @@
-package Convene.Backend.User;
+package Convene.Backend.AppUser;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

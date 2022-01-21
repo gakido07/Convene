@@ -1,11 +1,6 @@
 package Convene.Backend.Models;
 
-import Convene.Backend.User.AppUser;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
-
 import java.sql.Date;
-import java.util.Set;
 
 
 public abstract class Project {

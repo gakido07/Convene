@@ -1,12 +1,19 @@
 package Convene.Backend.SoftwareProject.SoftwareProjectRole;
 import Convene.Backend.SoftwareProject.SoftwareProject;
-import Convene.Backend.User.AppUser;
+import Convene.Backend.AppUser.AppUser;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
 @Table(name = "software_project_role")
+@Getter
+@NoArgsConstructor
 public class SoftwareProjectRole {
 
     @Id
@@ -31,4 +38,20 @@ public class SoftwareProjectRole {
     )
     private Set<AppUser> teamMembers;
     private String role;
+
+    public SoftwareProjectRole(String role, SoftwareProject softwareProject) {
+        this.role = role;
+        this.softwareProject = softwareProject;
+    }
+
+    public SoftwareProjectRole withAppUsers(Set<AppUser> appUsers) {
+        if(this.teamMembers == null) {
+            this.teamMembers = new HashSet<>();
+        }
+        appUsers.forEach(appUser -> {
+            this.teamMembers.add(appUser);
+        });
+
+        return this;
+    }
 }

@@ -3,14 +3,13 @@ package Convene.Backend.SoftwareProject;
 import Convene.Backend.Models.Project;
 import Convene.Backend.SoftwareProject.SoftwareProjectRole.SoftwareProjectRole;
 import Convene.Backend.SoftwareProject.Sprint.Sprint;
-import Convene.Backend.User.AppUser;
+import Convene.Backend.AppUser.AppUser;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import javax.persistence.*;
 import java.sql.Date;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -64,8 +63,6 @@ public class SoftwareProject extends Project{
         this.teamMembers.add(user);
     }
 
-//    public SoftwareProject(Long id, String name)
-
     @Override
     public String getName() {
         return name;
@@ -100,8 +97,19 @@ public class SoftwareProject extends Project{
         return projectType;
     }
 
+    public Set<SoftwareProjectRole> getRoles() {
+        return roles;
+    }
+
     public Set<AppUser> getTeamMembers() {
         return teamMembers;
+    }
+
+    public void addRole(SoftwareProjectRole role) {
+        if(roles == null) {
+            this.roles = new HashSet<>();
+        }
+        this.roles.add(role);
     }
 
     public void addTeamMember(AppUser teamMember) {

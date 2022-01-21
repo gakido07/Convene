@@ -1,4 +1,4 @@
-package Convene.Backend.User;
+package Convene.Backend.AppUser;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,11 +10,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/user/{userId}")
 public class AppUserController {
 
-    @Autowired
     private AppUserService appUserService;
+
+    @Autowired
+    public AppUserController(AppUserService appUserService) {
+        this.appUserService = appUserService;
+    }
 
     @GetMapping(path = "/projects")
     public AppUserDto getAppUserDto(@PathVariable String userId) {
-        return appUserService.getUserSoftwareProjects(Long.valueOf(userId));
+        return appUserService.getAppUserDto(Long.valueOf(userId));
     }
 }

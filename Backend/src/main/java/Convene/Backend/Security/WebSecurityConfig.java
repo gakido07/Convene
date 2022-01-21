@@ -2,7 +2,7 @@ package Convene.Backend.Security;
 
 import Convene.Backend.Security.Auth.Jwt.JwtAuthenticationEntryPoint;
 import Convene.Backend.Security.Auth.Jwt.JwtRequestFilter;
-import Convene.Backend.User.AppUserService;
+import Convene.Backend.AppUser.AppUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,6 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+
     @Autowired
     private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
@@ -46,7 +47,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         httpSecurity
                 .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/auth/*")
+                .antMatchers("/auth/**")
                 .permitAll()
                 .anyRequest()
                 .authenticated()

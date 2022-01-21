@@ -1,11 +1,11 @@
-package Convene.Backend.User;
+package Convene.Backend.AppUser;
 
 import Convene.Backend.Exception.CustomExceptions.AuthExceptions;
 import Convene.Backend.SoftwareProject.SoftwareProjectRepository;
 import Convene.Backend.Security.Auth.AuthDto;
-import Convene.Backend.Security.EmailVerification.EmailVerification;
-import Convene.Backend.Security.EmailVerification.EmailVerificationDto;
-import Convene.Backend.Security.EmailVerification.EmailVerificationService;
+import Convene.Backend.Email.EmailVerification.EmailVerification;
+import Convene.Backend.Email.EmailVerification.EmailVerificationDto;
+import Convene.Backend.Email.EmailVerification.EmailVerificationService;
 import Convene.Backend.Security.Auth.Jwt.JwtUtil;
 import Convene.Backend.Security.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,26 +14,30 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
-public class AppUserService implements UserDetailsService {
+public class AppUserService implements UserDetailsService, AppUserServiceImpl {
 
     private final static String USER_NOT_FOUND_MSG = "USER NOT FOUND";
     private final  static String  USERNAME_TAKEN = "USERNAME TAKEN";
 
-    @Autowired
     private AppUserRepository appUserRepository;
 
-    @Autowired
-    private SoftwareProjectRepository softwareProjectRepository;
+    private EmailVerificationService emailVerificationService;
 
-    @Autowired
-    EmailVerificationService emailVerificationService;
-
-    @Autowired
     private SecurityUtil securityUtil;
 
-    @Autowired
     private JwtUtil jwtUtil;
+
+    @Autowired
+    public AppUserService(AppUserRepository appUserRepository, EmailVerificationService emailVerificationService,
+                          SecurityUtil securityUtil, JwtUtil jwtUtil) {
+        this.appUserRepository = appUserRepository;
+        this.emailVerificationService = emailVerificationService;
+        this.securityUtil = securityUtil;
+        this.jwtUtil = jwtUtil;
+    }
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -41,31 +45,16 @@ public class AppUserService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException(USER_NOT_FOUND_MSG));
     }
 
-    public String verifyEmail(EmailVerificationDto.EmailVerificationRequest validationRequest) throws Exception {
-        String message = "";
-        Boolean userExists = appUserRepository.findAppUserByEmail(validationRequest.getEmail()).isPresent();
-        if (userExists){
-            throw new AuthExceptions.UserExistsException();
-        }
-        try {
-            emailVerificationService.saveVerificationRequest(validationRequest.getEmail());
-            emailVerificationService.sendVerificationEmail(validationRequest.getEmail());
-
-            message = "Verification code sent";
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            //TODO Catch Error while sending error
-        }
-
-        return message;
+    @Override
+    public Optional<AppUser> findAppUserByEmail(String email) throws Exception {
+        return appUserRepository.findAppUserByEmail(email);
     }
 
+    @Override
     public String registerUser(AppUserDto.SignUpRequest signUpRequest) throws Exception {
         String message = "";
         Boolean userExists = appUserRepository.findAppUserByEmail(signUpRequest.getEmail()).isPresent();
 
-        //TODO Throw error when verification record not found
         EmailVerification verification = emailVerificationService.loadVerificationRecord(signUpRequest.getEmail());
 
         if (userExists.booleanValue()){
@@ -84,6 +73,12 @@ public class AppUserService implements UserDetailsService {
         return message;
     }
 
+    @Override
+    public AppUser findAppUserById(Long id) throws Exception {
+        return appUserRepository.findById(id).orElseThrow(() -> new AuthExceptions.UserNotFoundException());
+    }
+
+    @Override
     public AuthDto logIn(AppUserDto.LogInRequest logInRequest) throws Exception {
         if(!Util.validateEmail(logInRequest.getEmail())){
             throw new Exception("Invalid email");
@@ -108,7 +103,8 @@ public class AppUserService implements UserDetailsService {
         return new AuthDto(userDetails.getUsername(), token);
     }
 
-    public AppUserDto getUserSoftwareProjects(Long id) {
+    @Override
+    public AppUserDto getAppUserDto(Long id) {
         AppUserDto.AppUserDtoProjection appUserDtoProjection = appUserRepository.findAppUserProjectsById(id).orElseThrow(() -> new AuthExceptions.UserNotFoundException());
         return new AppUserDto(appUserDtoProjection);
     }

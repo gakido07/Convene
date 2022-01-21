@@ -1,10 +1,8 @@
 package Convene.Backend.Security.Auth.Jwt;
 
-import Convene.Backend.User.AppUserService;
+import Convene.Backend.AppUser.AppUserService;
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,18 +22,22 @@ import java.util.List;
 
 @Configuration
 public class JwtRequestFilter extends OncePerRequestFilter {
-    @Autowired
+
     private AppUserService appUserService;
 
-    @Autowired
     private JwtUtil jwtUtil;
 
 
     String email = "";
     String token = "";
 
-    private final  List<String> skipFilterUrls = Arrays.asList("/auth/*");
+    @Autowired
+    public JwtRequestFilter(AppUserService appUserService, JwtUtil jwtUtil) {
+        this.appUserService = appUserService;
+        this.jwtUtil = jwtUtil;
+    }
 
+    private final  List<String> skipFilterUrls = Arrays.asList("/auth/**");
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
@@ -52,6 +54,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         token = request.getHeader("Authorization").substring(7);
 
         //TODO write logic to authenticate based on granted authorities
+
 
         try{
             email = jwtUtil.getEmailFromToken(token);

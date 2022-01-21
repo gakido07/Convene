@@ -1,13 +1,8 @@
 package Convene.Backend.SoftwareProject;
 
-import Convene.Backend.User.AppUser;
-import Convene.Backend.User.AppUserDto;
 import lombok.Data;
 
-import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Data
 public class SoftwareProjectDto {

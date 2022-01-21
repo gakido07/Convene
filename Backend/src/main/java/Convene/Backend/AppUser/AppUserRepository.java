@@ -1,4 +1,4 @@
-package Convene.Backend.User;
+package Convene.Backend.AppUser;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,30 +1,44 @@
-package Convene.Backend.Security.EmailVerification;
+package Convene.Backend.Email.EmailVerification;
 
+import Convene.Backend.AppUser.AppUserRepository;
+import Convene.Backend.AppUser.AppUserService;
 import Convene.Backend.Email.JavaMailSenderConfig;
 import Convene.Backend.Exception.CustomExceptions.AuthExceptions;
+import com.sun.mail.smtp.SMTPSendFailedException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class EmailVerificationService {
 
     private final String EMAIL_VALIDATION_MESSAGE = "Here is your email validation code: ";
     private final String SUBJECT = "Convene Email Validation";
 
-    @Autowired
     private JavaMailSenderConfig mailSender;
 
+    private EmailVerificationRepository verificationRepository;
+
+    private AppUserRepository appUserRepository;
+
+
+
     @Autowired
-    private EmailVerificationRepository validationRepository;
+    public EmailVerificationService(JavaMailSenderConfig mailSender, EmailVerificationRepository repository, AppUserRepository appUserRepository) {
+        this.mailSender = mailSender;
+        this.verificationRepository = repository;
+        this.appUserRepository = appUserRepository;
+    }
 
     public EmailVerification loadVerificationRecord(String email) throws Exception {
-        return validationRepository.findByEmail(email)
+        return verificationRepository.findByEmail(email)
                 .orElseThrow(() -> new AuthExceptions.EmailValidationRecordNotFoundException());
     }
 
-    public void saveVerificationRequest(String email){
+    private void saveVerificationRequest(String email){
         EmailVerification emailVerification = new EmailVerification(email);
-        validationRepository.save(emailVerification);
+        verificationRepository.save(emailVerification);
     }
 
 
@@ -34,9 +48,8 @@ public class EmailVerificationService {
         if(!request.getVerificationCode().equals(emailVerification.getValidationCode())){
             throw new AuthExceptions.InvalidVerificationCodeException();
         }
-
         emailVerification.setVerified(true);
-        validationRepository.save(emailVerification);
+        verificationRepository.save(emailVerification);
 
         return emailVerification;
     }
@@ -53,7 +66,27 @@ public class EmailVerificationService {
 
     public void deleteVerificationRecord(String email) throws Exception {
         EmailVerification emailVerification = loadVerificationRecord(email);
-        validationRepository.delete(emailVerification);
+        verificationRepository.delete(emailVerification);
+    }
+
+    public String verifyEmail(EmailVerificationDto.EmailVerificationRequest verificationRequest) throws Exception {
+        String message = "";
+        Boolean userExists = appUserRepository.findAppUserByEmail(verificationRequest.getEmail()).isPresent();
+        if (userExists){
+            throw new AuthExceptions.UserExistsException();
+        }
+        try {
+            saveVerificationRequest(verificationRequest.getEmail());
+            sendVerificationEmail(verificationRequest.getEmail());
+
+            message = "Verification code sent";
+
+        } catch (SMTPSendFailedException failedException) {
+            failedException.printStackTrace();
+            EmailVerification emailVerification = verificationRepository.findByEmail(verificationRequest.getEmail()).get();
+            verificationRepository.delete(emailVerification);
+        }
+        return message;
     }
 
 

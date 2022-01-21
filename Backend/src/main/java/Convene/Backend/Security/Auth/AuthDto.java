@@ -1,6 +1,5 @@
 package Convene.Backend.Security.Auth;
 
-import Convene.Backend.User.AppUser;
 import lombok.Getter;
 import lombok.Setter;
 

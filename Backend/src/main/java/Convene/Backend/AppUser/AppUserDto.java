@@ -1,12 +1,9 @@
-package Convene.Backend.User;
+package Convene.Backend.AppUser;
 
-import Convene.Backend.SoftwareProject.ProjectType;
 import Convene.Backend.SoftwareProject.SoftwareProject;
 import Convene.Backend.SoftwareProject.SoftwareProjectDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Set;
 import java.util.stream.Collectors;

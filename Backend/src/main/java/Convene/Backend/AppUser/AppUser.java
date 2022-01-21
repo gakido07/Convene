@@ -1,16 +1,17 @@
-package Convene.Backend.User;
+package Convene.Backend.AppUser;
 
 import Convene.Backend.SoftwareProject.Issue.Issue;
 import Convene.Backend.SoftwareProject.SoftwareProject;
 import Convene.Backend.SoftwareProject.SoftwareProjectRole.SoftwareProjectRole;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Set;
 
@@ -44,13 +45,13 @@ public class AppUser implements UserDetails {
 
     private boolean accountLocked;
 
-    @Getter @ManyToMany(mappedBy = "teamMembers")
+    @Getter @ManyToMany(mappedBy = "teamMembers", fetch = FetchType.EAGER)
     private Set<SoftwareProject> projects;
 
-    @OneToMany(mappedBy = "assignee")
+    @OneToMany(mappedBy = "assignee", fetch = FetchType.EAGER)
     private Set<Issue> issues;
 
-    @ManyToMany(mappedBy = "teamMembers")
+    @ManyToMany(mappedBy = "teamMembers", fetch = FetchType.EAGER)
     private Set<SoftwareProjectRole> projectRoles;
 
     public AppUser(AppUserDto.SignUpRequest signUpRequest) {
@@ -65,7 +66,6 @@ public class AppUser implements UserDetails {
         this.email = email;
         this.projects = projects;
     }
-
 
     public String getFirstName() {
         return firstName;
@@ -97,7 +97,16 @@ public class AppUser implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
+        if(projectRoles.size() == 0) {
+            return null;
+        }
+        projectRoles.forEach(role -> {
+            String formatAuthority = role.getRole() + " " + role.getSoftwareProject().getId();
+            authorities.add(new SimpleGrantedAuthority(formatAuthority));
+        });
+
+        return authorities;
     }
 
     public String getPassword() {
