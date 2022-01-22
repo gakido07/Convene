@@ -1,5 +1,6 @@
 package Convene.Backend.Security.Auth.Jwt;
 
+import Convene.Backend.AppUser.AppUser;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -21,25 +22,28 @@ public class JwtUtil implements Serializable {
     @Value("${jwt.secret}")
     private String secret;
 
-    public String setTokenAttributes(Map<String, Object> claims, String subject){
+    public String setTokenAttributes(Map<String, Object> claims, AppUser appUser){
         Date iat = new Date();
         Date exp = new Date(iat.getTime() + JWT_TOKEN_VALIDITY);
 
         return Jwts.builder()
                 .setHeaderParam("typ", "JWT")
                 .setClaims(claims)
-                .setSubject(subject)
+                .setId(appUser.getId().toString())
+                .setSubject(appUser.getEmail())
                 .setIssuedAt(iat)
+                .setIssuer("Convene Application v.1")
                 .setExpiration(exp)
                 .signWith(SignatureAlgorithm.HS256, secret)
                 .compact();
     }
 
 
-    public String generateToken(UserDetails userDetails){
+    public String generateToken(AppUser appUser){
         Map<String, Object> claims = new HashMap<>();
-        claims.put("projects", userDetails.getAuthorities());
-        return setTokenAttributes(claims, userDetails.getUsername());
+        claims.put("id", appUser.getId());
+        claims.put("projects", appUser.getAuthorities());
+        return setTokenAttributes(claims, appUser);
     }
 
     private Claims getAllClaimsFromToken(String token){
@@ -69,10 +73,15 @@ public class JwtUtil implements Serializable {
         return getSpecificClaimFromToken(token, Claims::getSubject);
     }
 
+    public String getIdFromToken(String token) {
+        return getSpecificClaimFromToken(token, Claims::getId);
+    }
 
-    public Boolean validateToken(String token, UserDetails userDetails){
+
+    public Boolean validateToken(String token, AppUser appUser){
         final String email = getEmailFromToken(token);
-        return (email.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        return (email.equals(appUser.getEmail()) && !isTokenExpired(token) &&
+                appUser.getId().toString().equals(getSpecificClaimFromToken(token, Claims::getId)));
     }
 
 

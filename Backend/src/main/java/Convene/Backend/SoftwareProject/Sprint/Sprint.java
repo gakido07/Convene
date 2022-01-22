@@ -2,13 +2,17 @@ package Convene.Backend.SoftwareProject.Sprint;
 
 import Convene.Backend.SoftwareProject.Issue.Issue;
 import Convene.Backend.SoftwareProject.SoftwareProject;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.sql.Date;
+import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
 @Table(name = "sprint")
+@NoArgsConstructor
 public class Sprint {
     @Id
     @SequenceGenerator(
@@ -18,20 +22,18 @@ public class Sprint {
     )
     @GeneratedValue(
             strategy = GenerationType.SEQUENCE,
-            generator = "user_sequence"
+            generator = "sprint_sequence"
     )
     private Long id;
     private String name;
     @ManyToOne
     @JoinColumn(
-            name = "id",
+            name = "software_project",
             nullable = false,
-            insertable = false,
             updatable = false
     )
     private SoftwareProject softwareProject;
     private Boolean status;
-
     @OneToMany(mappedBy = "sprint")
     private Set<Issue> issues;
     private Date  startDate;
@@ -47,6 +49,15 @@ public class Sprint {
 
     public Boolean getStatus() {
         return status;
+    }
+
+    public Sprint(String name, Date endDate, SoftwareProject softwareProject) {
+        this.name = name;
+        this.softwareProject = softwareProject;
+        this.status = false;
+        this.issues = new HashSet<>();
+        this.startDate = Date.valueOf(LocalDate.now());
+        this.endDate = endDate;
     }
 
     public void setStatus(Boolean status, Date startDate, Date endDate) {

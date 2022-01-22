@@ -1,6 +1,5 @@
 package Convene.Backend.AppUser;
 
-import Convene.Backend.Email.EmailVerification.EmailVerificationDto;
 import Convene.Backend.Security.Auth.AuthDto;
 
 import java.util.Optional;

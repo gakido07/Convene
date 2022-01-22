@@ -20,16 +20,14 @@ import javax.servlet.http.HttpServletResponse;
 @RequestMapping(path = "/auth")
 public class AuthController {
 
-    @Autowired
     private AppUserService appUserService;
 
-    @Autowired
     private EmailVerificationService emailVerificationService;
 
-    @Autowired
     private SecurityUtil securityUtil;
 
 
+    @Autowired
     public AuthController(AppUserService appUserService, EmailVerificationService emailVerificationService, SecurityUtil securityUtil) {
         this.appUserService = appUserService;
         this.emailVerificationService = emailVerificationService;

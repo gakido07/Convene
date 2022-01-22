@@ -1,17 +1,20 @@
 package Convene.Backend.Security.Auth.Jwt;
 
+import Convene.Backend.AppUser.AppUser;
 import Convene.Backend.AppUser.AppUserService;
+import Convene.Backend.Exception.CustomExceptions.AuthExceptions;
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
-
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -19,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Configuration
 public class JwtRequestFilter extends OncePerRequestFilter {
@@ -30,6 +34,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
     String email = "";
     String token = "";
+
+    final String userRoute = "/user/**";
 
     @Autowired
     public JwtRequestFilter(AppUserService appUserService, JwtUtil jwtUtil) {
@@ -67,20 +73,31 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         }
 
         if(email.length() > 0 && SecurityContextHolder.getContext().getAuthentication() == null){
-            UserDetails userDetails = appUserService.loadUserByUsername(email);
-            if(jwtUtil.validateToken(token, userDetails)){
+            AppUser appUser = appUserService.findAppUserByEmail(email).orElseThrow(AuthExceptions.UserNotFoundException::new);
+            if(jwtUtil.validateToken(token, appUser) && userRouteProtection(request, token, appUser)){
                 UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
                         email,
                         null,
-                        userDetails.getAuthorities()
+                        appUser.getAuthorities()
                 );
                 usernamePasswordAuthenticationToken.setDetails(
                         new WebAuthenticationDetailsSource()
                                 .buildDetails(request)
                 );
                 SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+                logger.info(request.getRequestURI() + "accessed by " + appUser.getEmail());
             }
         }
         filterChain.doFilter(request, response);
+    }
+
+
+
+    public Boolean userRouteProtection(HttpServletRequest request, String token, AppUser appUser) {
+        AntPathRequestMatcher requestMatcher = new AntPathRequestMatcher(userRoute);
+        if(requestMatcher.matches(request) && Long.valueOf(jwtUtil.getIdFromToken(token)) != appUser.getId()) {
+            return false;
+        }
+        return true;
     }
 }

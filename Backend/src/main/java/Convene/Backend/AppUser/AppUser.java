@@ -11,9 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @NoArgsConstructor
@@ -29,6 +27,7 @@ public class AppUser implements UserDetails {
             strategy = GenerationType.SEQUENCE,
             generator = "app_user_sequence"
     )
+    @Getter
     private Long id;
 
     @Email(message = "Email should be valid")
@@ -62,10 +61,6 @@ public class AppUser implements UserDetails {
         this.accountLocked = false;
     }
 
-    public AppUser(String email, Set<SoftwareProject> projects) {
-        this.email = email;
-        this.projects = projects;
-    }
 
     public String getFirstName() {
         return firstName;
@@ -101,10 +96,20 @@ public class AppUser implements UserDetails {
         if(projectRoles.size() == 0) {
             return null;
         }
-        projectRoles.forEach(role -> {
-            String formatAuthority = role.getRole() + " " + role.getSoftwareProject().getId();
-            authorities.add(new SimpleGrantedAuthority(formatAuthority));
+        final String ADMIN = "ADMIN";
+        final String MEMBER = "MEMBER";
+        List<Long> adminPrivileges = new ArrayList<>();
+        List<Long> memberPrivileges = new ArrayList<>();
+         projectRoles.forEach(role -> {
+             if(role.getRole().equals("ADMIN")) {
+                 adminPrivileges.add(role.getSoftwareProject().getId());
+             }
+             if(role.getRole().equals("MEMBER")) {
+                 memberPrivileges.add(role.getSoftwareProject().getId());
+             }
         });
+         authorities.add(new SimpleGrantedAuthority(ADMIN + " " + Arrays.toString(adminPrivileges.toArray())));
+         authorities.add(new SimpleGrantedAuthority(MEMBER + " " + Arrays.toString(memberPrivileges.toArray())));
 
         return authorities;
     }
@@ -139,4 +144,3 @@ public class AppUser implements UserDetails {
     }
 
 }
-

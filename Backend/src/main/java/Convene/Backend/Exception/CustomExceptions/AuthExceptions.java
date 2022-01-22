@@ -8,6 +8,7 @@ public class AuthExceptions {
     private static final String INVALID_VERIFICATION_CODE = "Wrong verification code";
     private static final String ACCOUNT_LOCKED_MESSAGE = "Account locked";
     private static final String WRONG_EMAIL_OR_PASSWORD_MESSAGE = "Wrong email or password";
+    public static final String UNAUTHORIZED_MESSAGE = "You are unauthorized to access this route";
 
     public static class UserNotFoundException extends RuntimeException{
         public UserNotFoundException() {
@@ -41,5 +42,9 @@ public class AuthExceptions {
         public InvalidAuthCredentialsException() {
             super(WRONG_EMAIL_OR_PASSWORD_MESSAGE);
         }
+    }
+
+    public static class UNAUTHORIZEDEXCEPTION extends RuntimeException {
+        public UNAUTHORIZEDEXCEPTION() { super(UNAUTHORIZED_MESSAGE); }
     }
 }

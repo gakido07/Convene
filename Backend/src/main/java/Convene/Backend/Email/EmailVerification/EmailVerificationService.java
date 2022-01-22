@@ -22,8 +22,6 @@ public class EmailVerificationService {
 
     private AppUserRepository appUserRepository;
 
-
-
     @Autowired
     public EmailVerificationService(JavaMailSenderConfig mailSender, EmailVerificationRepository repository, AppUserRepository appUserRepository) {
         this.mailSender = mailSender;
@@ -41,7 +39,6 @@ public class EmailVerificationService {
         verificationRepository.save(emailVerification);
     }
 
-
     public EmailVerification verifyCode(EmailVerificationDto.CodeValidationRequest request) throws Exception {
         EmailVerification emailVerification = loadVerificationRecord(request.getEmail());
         System.out.println(emailVerification.getEmail());
@@ -50,7 +47,6 @@ public class EmailVerificationService {
         }
         emailVerification.setVerified(true);
         verificationRepository.save(emailVerification);
-
         return emailVerification;
     }
 
@@ -78,16 +74,14 @@ public class EmailVerificationService {
         try {
             saveVerificationRequest(verificationRequest.getEmail());
             sendVerificationEmail(verificationRequest.getEmail());
-
             message = "Verification code sent";
-
         } catch (SMTPSendFailedException failedException) {
             failedException.printStackTrace();
+            log.error("Email sending failed for verification request", verificationRequest);
             EmailVerification emailVerification = verificationRepository.findByEmail(verificationRequest.getEmail()).get();
             verificationRepository.delete(emailVerification);
         }
         return message;
     }
-
 
 }

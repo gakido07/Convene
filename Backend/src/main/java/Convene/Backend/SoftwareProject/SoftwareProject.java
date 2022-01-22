@@ -6,10 +6,12 @@ import Convene.Backend.SoftwareProject.Sprint.Sprint;
 import Convene.Backend.AppUser.AppUser;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
 import java.sql.Date;
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -37,14 +39,19 @@ public class SoftwareProject extends Project{
 
     private String description;
 
+    @Getter @Setter
+    @Enumerated(EnumType.STRING)
     private ProjectType projectType;
 
-    @OneToMany(mappedBy = "softwareProject")
+    @Getter
+    @OneToMany(mappedBy = "softwareProject", cascade = CascadeType.ALL)
     private Set<SoftwareProjectRole> roles;
 
-    @OneToMany(mappedBy = "softwareProject")
+    @Getter
+    @OneToMany(mappedBy = "softwareProject", cascade = CascadeType.ALL)
     private Set<Sprint> sprints;
 
+    @Getter
     @ManyToMany
     @JoinTable(
             name = "project_team",
@@ -55,12 +62,18 @@ public class SoftwareProject extends Project{
 
 
     //Constructor
-    public SoftwareProject(String name, ProjectType type, String description, AppUser user) {
-        this.name = name;
-        this.description = description;
-        this.projectType = type;
+    public SoftwareProject(SoftwareProjectDto.CreateSoftwareProjectRequest request, AppUser appUser) {
+        this.name = request.getName();
+        this.description = request.getDescription();
+        this.initiationDate = Date.valueOf(LocalDate.now());
+        this.projectType = request.getType();
+        this.roles = new HashSet<>();
         this.teamMembers = new HashSet<AppUser>();
-        this.teamMembers.add(user);
+        this.teamMembers.add(appUser);
+        roles.add(new SoftwareProjectRole("ADMIN", this)
+        .withAppUsers(
+                teamMembers
+        ));
     }
 
     @Override
@@ -115,4 +128,5 @@ public class SoftwareProject extends Project{
     public void addTeamMember(AppUser teamMember) {
         this.teamMembers.add(teamMember);
     }
+
 }
