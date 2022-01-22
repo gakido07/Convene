@@ -72,18 +72,4 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
 
         return false;
     }
-
-//    private Boolean isUserAuthorizedToAccessRoute(Authentication authentication, String targetType, String permission) {
-////        System.out.println(targetType);
-////        System.out.println(authentication.getCredentials());
-////        System.out.println(authentication.getName());
-////        System.out.println(authentication.getDetails());
-////        System.out.println(authentication.getPrincipal());
-////        System.out.println(authentication);
-//        if (authentication.get) {
-//
-////        }
-//
-//            return false;
-//    }
 }
