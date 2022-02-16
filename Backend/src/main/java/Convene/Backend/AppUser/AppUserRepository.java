@@ -9,5 +9,5 @@ public interface AppUserRepository extends JpaRepository<AppUser, Long> {
 
     Optional<AppUser> findAppUserByEmail(String email);
 
-    Optional<AppUserDto.AppUserDtoProjection> findAppUserProjectsById(Long id);
+    Optional<AppUserDto.AppUserDtoProjection> findAppUserProjectsById(long id);
 }

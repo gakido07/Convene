@@ -16,11 +16,11 @@ public class EmailVerificationService {
     private final String EMAIL_VALIDATION_MESSAGE = "Here is your email validation code: ";
     private final String SUBJECT = "Convene Email Validation";
 
-    private JavaMailSenderConfig mailSender;
+    private final JavaMailSenderConfig mailSender;
 
-    private EmailVerificationRepository verificationRepository;
+    private final EmailVerificationRepository verificationRepository;
 
-    private AppUserRepository appUserRepository;
+    private final AppUserRepository appUserRepository;
 
     @Autowired
     public EmailVerificationService(JavaMailSenderConfig mailSender, EmailVerificationRepository repository, AppUserRepository appUserRepository) {
@@ -31,7 +31,7 @@ public class EmailVerificationService {
 
     public EmailVerification loadVerificationRecord(String email) throws Exception {
         return verificationRepository.findByEmail(email)
-                .orElseThrow(() -> new AuthExceptions.EmailValidationRecordNotFoundException());
+                .orElseThrow(AuthExceptions.EmailValidationRecordNotFoundException::new);
     }
 
     private void saveVerificationRequest(String email){
@@ -41,8 +41,7 @@ public class EmailVerificationService {
 
     public EmailVerification verifyCode(EmailVerificationDto.CodeValidationRequest request) throws Exception {
         EmailVerification emailVerification = loadVerificationRecord(request.getEmail());
-        System.out.println(emailVerification.getEmail());
-        if(!request.getVerificationCode().equals(emailVerification.getValidationCode())){
+        if(!(request.getVerificationCode() == emailVerification.getValidationCode())){
             throw new AuthExceptions.InvalidVerificationCodeException();
         }
         emailVerification.setVerified(true);
@@ -51,13 +50,15 @@ public class EmailVerificationService {
     }
 
     public void sendVerificationEmail(String email) throws Exception {
-        EmailVerification emailVerification = loadVerificationRecord(email);
-        String message = EMAIL_VALIDATION_MESSAGE + emailVerification.getValidationCode().toString();
-        mailSender.sendSimpleMessage(
-                email,
-                SUBJECT,
-                message
-        );
+        if(!verificationRepository.findByEmail(email).isPresent()){
+            EmailVerification emailVerification = new EmailVerification(email);
+            String message = EMAIL_VALIDATION_MESSAGE + Integer.toString(emailVerification.getValidationCode());
+            mailSender.sendSimpleMessage(
+                    email,
+                    SUBJECT,
+                    message
+            );
+        };
     }
 
     public void deleteVerificationRecord(String email) throws Exception {
@@ -67,20 +68,20 @@ public class EmailVerificationService {
 
     public String verifyEmail(EmailVerificationDto.EmailVerificationRequest verificationRequest) throws Exception {
         String message = "";
-        Boolean userExists = appUserRepository.findAppUserByEmail(verificationRequest.getEmail()).isPresent();
+        boolean userExists = appUserRepository.findAppUserByEmail(verificationRequest.getEmail()).isPresent();
         if (userExists){
             throw new AuthExceptions.UserExistsException();
         }
         try {
-            saveVerificationRequest(verificationRequest.getEmail());
             sendVerificationEmail(verificationRequest.getEmail());
             message = "Verification code sent";
         } catch (SMTPSendFailedException failedException) {
             failedException.printStackTrace();
             log.error("Email sending failed for verification request", verificationRequest);
-            EmailVerification emailVerification = verificationRepository.findByEmail(verificationRequest.getEmail()).get();
-            verificationRepository.delete(emailVerification);
+            return message = "Error while sending email, try again";
         }
+        saveVerificationRequest(verificationRequest.getEmail());
+
         return message;
     }
 

@@ -17,7 +17,7 @@ public class SoftwareProjectRoleService implements SoftwareProjectServiceImpl {
     }
 
     @Override
-    public SoftwareProjectRole findRoleById(Long id) {
+    public SoftwareProjectRole findRoleById(long id) {
         return roleRepository.findById(id).orElseThrow(SoftwareProjectRoleExceptions.SoftwareProjectRoleNotFoundException::new);
     }
 

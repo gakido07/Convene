@@ -4,7 +4,7 @@ import java.sql.Date;
 
 
 public abstract class Project {
-    private Long id;
+    private long id;
     private String name;
     private Date initiationDate;
     private String description;

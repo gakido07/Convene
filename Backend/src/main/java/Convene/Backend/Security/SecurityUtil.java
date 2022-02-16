@@ -29,7 +29,7 @@ public class SecurityUtil {
                 throw new IllegalArgumentException("Authority String array can't exceed two elements");
             }
 
-            Integer lastIndex = authorityStringSplit[1].lastIndexOf("]");
+            int lastIndex = authorityStringSplit[1].lastIndexOf("]");
             String[] privilegesString = authorityStringSplit[1]
                     .substring(1, lastIndex)
                     .split(",");
@@ -48,7 +48,7 @@ public class SecurityUtil {
         if(!Arrays.stream(privilegesString).collect(Collectors.toList()).contains("")) {
             memberPrivileges = Arrays.stream(privilegesString).map(privilege -> {
                 privilege = privilege.trim();
-                Long id = Long.valueOf(privilege);
+                long id = Long.valueOf(privilege);
                 return id;
             }).collect(Collectors.toList());
         }

@@ -22,13 +22,13 @@ public class AppUserService implements UserDetailsService, AppUserServiceImpl {
     private final static String USER_NOT_FOUND_MSG = "USER NOT FOUND";
     private final  static String  USERNAME_TAKEN = "USERNAME TAKEN";
 
-    private AppUserRepository appUserRepository;
+    private final AppUserRepository appUserRepository;
 
-    private EmailVerificationService emailVerificationService;
+    private final EmailVerificationService emailVerificationService;
 
-    private SecurityUtil securityUtil;
+    private final SecurityUtil securityUtil;
 
-    private JwtUtil jwtUtil;
+    private final JwtUtil jwtUtil;
 
     @Autowired
     public AppUserService(AppUserRepository appUserRepository, EmailVerificationService emailVerificationService,
@@ -52,30 +52,27 @@ public class AppUserService implements UserDetailsService, AppUserServiceImpl {
 
     @Override
     public String registerUser(AppUserDto.SignUpRequest signUpRequest) throws Exception {
-        String message = "";
-        Boolean userExists = appUserRepository.findAppUserByEmail(signUpRequest.getEmail()).isPresent();
+        boolean userExists = appUserRepository.findAppUserByEmail(signUpRequest.getEmail()).isPresent();
 
         EmailVerification verification = emailVerificationService.loadVerificationRecord(signUpRequest.getEmail());
 
-        if (userExists.booleanValue()){
+        if (userExists){
             throw new AuthExceptions.UserExistsException();
         }
-        if(!verification.getVerified()) {
+        if(!verification.isVerified()) {
             throw new AuthExceptions.InvalidVerificationCodeException();
         }
-
         String encodedPassword = securityUtil.passwordEncoder().encode(signUpRequest.getPassword());
         signUpRequest.setPassword(encodedPassword);
         AppUser newAppUser = new AppUser(signUpRequest);
         appUserRepository.save(newAppUser);
-        message = signUpRequest.getEmail() + " Account registered";
         emailVerificationService.deleteVerificationRecord(verification.getEmail());
-        return message;
+        return signUpRequest.getEmail() + " Account registered";
     }
 
     @Override
-    public AppUser findAppUserById(Long id) throws Exception {
-        return appUserRepository.findById(id).orElseThrow(() -> new AuthExceptions.UserNotFoundException());
+    public AppUser findAppUserById(long id) throws Exception {
+        return appUserRepository.findById(id).orElseThrow(AuthExceptions.UserNotFoundException::new);
     }
 
     @Override
@@ -83,7 +80,7 @@ public class AppUserService implements UserDetailsService, AppUserServiceImpl {
 
         AppUser appUser = null;
         String token = "";
-        Boolean userExists =  appUserRepository.findAppUserByEmail(logInRequest.getEmail()).isPresent();
+        boolean userExists =  appUserRepository.findAppUserByEmail(logInRequest.getEmail()).isPresent();
         if (!userExists){
             throw new AuthExceptions.UserNotFoundException();
         }
@@ -101,9 +98,13 @@ public class AppUserService implements UserDetailsService, AppUserServiceImpl {
     }
 
     @Override
-    public AppUserDto getAppUserDto(Long id) {
-        AppUserDto.AppUserDtoProjection appUserDtoProjection = appUserRepository.findAppUserProjectsById(id).orElseThrow(() -> new AuthExceptions.UserNotFoundException());
+    public AppUserDto getAppUserDto(long id) {
+        AppUserDto.AppUserDtoProjection appUserDtoProjection = appUserRepository.findAppUserProjectsById(id).orElseThrow(AuthExceptions.UserNotFoundException::new);
         return new AppUserDto(appUserDtoProjection);
     }
 
+    @Override
+    public AppUser changePassword(String currentPassword, String newPassword) {
+        return null;
+    }
 }

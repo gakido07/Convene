@@ -10,10 +10,11 @@ public interface AppUserServiceImpl {
 
     public String registerUser(AppUserDto.SignUpRequest signUpRequest) throws Exception;
 
-    public AppUser findAppUserById(Long id) throws Exception;
+    public AppUser findAppUserById(long id) throws Exception;
 
     public AuthDto logIn(AppUserDto.LogInRequest logInRequest) throws Exception;
 
-    public AppUserDto getAppUserDto(Long id);
+    public AppUserDto getAppUserDto(long id);
 
-    }
+    public AppUser changePassword(String currentPassword ,String newPassword);
+}

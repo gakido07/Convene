@@ -20,11 +20,11 @@ import javax.servlet.http.HttpServletResponse;
 @RequestMapping(path = "/auth")
 public class AuthController {
 
-    private AppUserService appUserService;
+    private final AppUserService appUserService;
 
-    private EmailVerificationService emailVerificationService;
+    private final EmailVerificationService emailVerificationService;
 
-    private SecurityUtil securityUtil;
+    private final SecurityUtil securityUtil;
 
 
     @Autowired
@@ -39,7 +39,7 @@ public class AuthController {
     public ResponseEntity<String> requestVerificationEmail(@RequestBody EmailVerificationDto.EmailVerificationRequest verificationRequest) throws Exception {
         String result = emailVerificationService.verifyEmail(verificationRequest);
         return new ResponseEntity<>(
-                result.toString(),
+                result,
                 HttpStatus.resolve(200)
         );
     }

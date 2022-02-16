@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 @Data
 public class SoftwareProjectDto {
     @NotNull
-    private Long id;
+    private long id;
     @NotNull
     private String name;
     @NotNull
@@ -36,7 +36,6 @@ public class SoftwareProjectDto {
         @NotNull
         private String description;
         @NotNull
-        private Long creatorId;
+        private long creatorId;
     }
-
 }

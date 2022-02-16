@@ -9,8 +9,6 @@ import java.util.Optional;
 
 @Repository
 public interface SoftwareProjectRepository extends JpaRepository<SoftwareProject, Long> {
-    @Override
-    Optional<SoftwareProject> findById(Long id);
+    Optional<SoftwareProject> findById(long id);
     Optional<List<SoftwareProject>> findSoftwareProjectsByTeamMembersContains(AppUser appUser);
-
 }

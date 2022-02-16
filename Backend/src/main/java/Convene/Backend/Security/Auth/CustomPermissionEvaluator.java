@@ -2,16 +2,11 @@ package Convene.Backend.Security.Auth;
 
 import Convene.Backend.Security.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @Component
@@ -30,19 +25,18 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
         if((authentication == null) || (object == null) || !(permission instanceof String)) {
             return false;
         }
-        String targetType = object.getClass().getSimpleName().toUpperCase();
         if(permission.equals("ADMIN")) {
-            return hasAdminPrivilege(authentication, targetType, object.toString());
+            return hasAdminPrivilege(authentication, object.toString());
         }
 
         if(permission.equals("MEMBER")) {
-            return (hasMemberPrivilege(authentication, targetType, object.toString())
+            return (hasMemberPrivilege(authentication, object.toString())
                     ||
-                    hasAdminPrivilege(authentication, targetType, object.toString()));
+                    hasAdminPrivilege(authentication, object.toString()));
         }
 
         log.info("Denying access for user " + authentication.getPrincipal().toString() + " without permission "
-                + permission.toString() );
+                + permission);
 
         return false;
     }
@@ -54,22 +48,15 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
         return false;
     }
 
-    private Boolean hasMemberPrivilege(Authentication authentication, String targetType, String permission) {
+    private boolean hasMemberPrivilege(Authentication authentication, String permission) {
         List<Long> memberPrivileges = securityUtil.extractUserPrivileges(authentication.getAuthorities())
                 .getMemberPrivileges();
-        if(memberPrivileges.contains(Long.valueOf(permission))){
-            return true;
-        }
-        return false;
+        return memberPrivileges.contains(Long.valueOf(permission));
     }
 
-    private Boolean hasAdminPrivilege(Authentication authentication, String targetType, String permission) {
+    private boolean hasAdminPrivilege(Authentication authentication, String permission) {
         List<Long> adminPrvileges = securityUtil.extractUserPrivileges(authentication.getAuthorities())
                 .getAdminPrivileges();
-        if(adminPrvileges.contains(Long.valueOf(permission))) {
-            return true;
-        }
-
-        return false;
+        return adminPrvileges.contains(Long.valueOf(permission));
     }
 }

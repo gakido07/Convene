@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 
 @Data
 public class SoftwareProjectRoleDto {
-    private Long id;
+    private long id;
     private String role;
     private Set<String> emails;
 

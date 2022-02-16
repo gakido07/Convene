@@ -22,20 +22,19 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Configuration
 public class JwtRequestFilter extends OncePerRequestFilter {
 
-    private AppUserService appUserService;
-
-    private JwtUtil jwtUtil;
-
-
     String email = "";
     String token = "";
-
-    final String userRoute = "/user/**";
+    final String userRoute = "/user/**/profile";
+    private final List<String> skipFilterUrls = Arrays.asList("/auth/**");
+    private final AppUserService appUserService;
+    private final JwtUtil jwtUtil;
 
     @Autowired
     public JwtRequestFilter(AppUserService appUserService, JwtUtil jwtUtil) {
@@ -43,14 +42,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         this.jwtUtil = jwtUtil;
     }
 
-    private final  List<String> skipFilterUrls = Arrays.asList("/auth/**");
-
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        return skipFilterUrls.stream()
-                .anyMatch(
-                        url -> new AntPathRequestMatcher(url).matches(request)
-                );
+        return skipFilterUrls.stream().anyMatch(url -> new AntPathRequestMatcher(url).matches(request));
     }
 
     @SneakyThrows
@@ -58,9 +52,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         token = request.getHeader("Authorization").substring(7);
-
-        //TODO write logic to authenticate based on granted authorities
-
 
         try{
             email = jwtUtil.getEmailFromToken(token);
@@ -74,7 +65,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
         if(email.length() > 0 && SecurityContextHolder.getContext().getAuthentication() == null){
             AppUser appUser = appUserService.findAppUserByEmail(email).orElseThrow(AuthExceptions.UserNotFoundException::new);
-            if(jwtUtil.validateToken(token, appUser) && userRouteProtection(request, token, appUser)){
+            if(jwtUtil.validateToken(token, appUser) && userRouteProtection(request, appUser)){
                 UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
                         email,
                         null,
@@ -85,19 +76,24 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                                 .buildDetails(request)
                 );
                 SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-                logger.info(request.getRequestURI() + "accessed by " + appUser.getEmail());
+                logger.info(request.getRequestURI() + " accessed by " + appUser.getEmail());
             }
         }
         filterChain.doFilter(request, response);
     }
 
-
-
-    public Boolean userRouteProtection(HttpServletRequest request, String token, AppUser appUser) {
-        AntPathRequestMatcher requestMatcher = new AntPathRequestMatcher(userRoute);
-        if(requestMatcher.matches(request) && Long.valueOf(jwtUtil.getIdFromToken(token)) != appUser.getId()) {
-            return false;
+    protected Boolean userRouteProtection(HttpServletRequest request, AppUser appUser) {
+        if (new AntPathRequestMatcher(userRoute).matches(request)) {
+            Long id = extractIdFromUrl(request.getRequestURI());
+            return id == appUser.getId();
         }
         return true;
+    }
+
+    private long extractIdFromUrl(String url) {
+        if(!url.contains("user")) {
+            throw new AuthExceptions.InvalidAuthCredentialsException();
+        }
+        return  Long.valueOf(url.split("/")[2]);
     }
 }

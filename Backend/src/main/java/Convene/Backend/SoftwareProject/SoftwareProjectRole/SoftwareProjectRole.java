@@ -5,9 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -26,7 +24,7 @@ public class SoftwareProjectRole {
             strategy = GenerationType.SEQUENCE,
             generator = "role_sequence"
     )
-    private Long id;
+    private long id;
     @ManyToOne
     @JoinColumn(name = "software_project", nullable = false, updatable = false)
     private SoftwareProject softwareProject;
@@ -48,9 +46,7 @@ public class SoftwareProjectRole {
         if(this.teamMembers == null) {
             this.teamMembers = new HashSet<>();
         }
-        appUsers.forEach(appUser -> {
-            this.teamMembers.add(appUser);
-        });
+        this.teamMembers.addAll(appUsers);
 
         return this;
     }
