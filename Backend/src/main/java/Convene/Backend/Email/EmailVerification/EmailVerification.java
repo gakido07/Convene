@@ -12,8 +12,6 @@ import java.util.Random;
 
 @Entity
 @NoArgsConstructor
-@Getter
-@Setter
 public class EmailVerification {
     @Id
     @SequenceGenerator(
@@ -25,7 +23,8 @@ public class EmailVerification {
             strategy = GenerationType.SEQUENCE,
             generator = "validation_sequence"
     )
-    private Long id;
+    private long id;
+
     @Email(message = "Invalid Email")
     @NotNull(message = "Email can't be blank for validation")
     @Getter
@@ -38,8 +37,9 @@ public class EmailVerification {
             max = 9999,
             message = "Validation code generated is out of range"
     )
-    private Integer validationCode;
-    Boolean verified;
+    private int validationCode;
+    @Getter
+    boolean verified;
 
     public EmailVerification(String email) {
         this.email = email;
@@ -47,15 +47,11 @@ public class EmailVerification {
         this.verified = false;
     }
 
-
-    private Integer generateValidationCode(){
-        Integer max = 9999;
-        Integer min = 1000;
-
+    private int generateValidationCode(){
+        int max = 9999;
+        int min = 1000;
         Random random = new Random();
-
-        Integer validationCode = random.nextInt(max - min) + min;
-
+        int validationCode = random.nextInt(max - min) + min;
         return validationCode;
     }
 }

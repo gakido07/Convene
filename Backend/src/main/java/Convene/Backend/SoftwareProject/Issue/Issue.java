@@ -1,5 +1,6 @@
 package Convene.Backend.SoftwareProject.Issue;
 
+import Convene.Backend.SoftwareProject.Issue.SubIssue.SubIssue;
 import Convene.Backend.SoftwareProject.Sprint.Sprint;
 import Convene.Backend.AppUser.AppUser;
 import lombok.AllArgsConstructor;
@@ -7,12 +8,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.Set;
 
-@Data
-@NoArgsConstructor
-@Entity
-@Table(name = "issue")
-@AllArgsConstructor
+@Data @NoArgsConstructor @AllArgsConstructor
+@Entity @Table(name = "issue")
 public class Issue {
     @Id
     @SequenceGenerator(
@@ -24,7 +23,7 @@ public class Issue {
             strategy = GenerationType.SEQUENCE,
             generator = "issue_sequence"
     )
-    private Long id;
+    private long id;
     @ManyToOne
     @JoinColumn(name = "assignee", nullable = false, updatable = false)
     private AppUser assignee;
@@ -49,8 +48,11 @@ public class Issue {
     @JoinColumn(name = "sprint", nullable = false, updatable = false)
     private Sprint sprint;
 
+    @OneToMany(mappedBy = "issue", fetch = FetchType.EAGER)
+    private Set<SubIssue> subIssues;
+
     public enum IssueStatus {
-        IN_PROGRESS, OPEN, CLOSED, REOPENED, RESOLVED
+        TODO, IN_PROGRESS, DONE
     }
 
     public enum Priority {

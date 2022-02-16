@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface SoftwareProjectRoleRepository extends JpaRepository<SoftwareProjectRole, Long> {
     @Override
-    SoftwareProjectRole getById(Long id);
+    SoftwareProjectRole getById(long id);
 }

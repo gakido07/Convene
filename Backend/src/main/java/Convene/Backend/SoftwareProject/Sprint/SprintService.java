@@ -25,12 +25,12 @@ public class SprintService implements SprintServiceImpl {
     }
 
     @Override
-    public Sprint findSprintById(Long id) {
+    public Sprint findSprintById(long id) {
         return sprintRepository.findSprintById(id).orElseThrow(SprintExceptions.SprintNotFoundException::new);
     }
 
     @Override
-    public List<Sprint> findSprintsBySoftwareProjectId(Long softwareProjectId) {
+    public List<Sprint> findSprintsBySoftwareProjectId(long softwareProjectId) {
         return sprintRepository.findSprintBySoftwareProjectId(softwareProjectId).orElse(new ArrayList<>());
     }
 
@@ -40,7 +40,19 @@ public class SprintService implements SprintServiceImpl {
         if(project.getProjectType().equals(ProjectType.KANBAN) && project.getSprints().size() > 0) {
             throw new SoftwareProjectExceptions.KanbanProjectSprintException();
         }
-        Sprint newSprint = new Sprint(request.getName(), request.getEndDate(), project);
+        Sprint newSprint = new Sprint(request.getName(), request.getStartDate(), request.getEndDate(), project);
         return sprintRepository.save(newSprint);
+    }
+
+    @Override
+    public Sprint deleteSprint(long sprintId) throws Exception {
+        Sprint sprint = findSprintById(sprintId);
+        sprintRepository.delete(sprint);
+        return  sprint;
+    }
+
+    @Override
+    public Sprint changeSprintStatus() throws Exception {
+        return null;
     }
 }

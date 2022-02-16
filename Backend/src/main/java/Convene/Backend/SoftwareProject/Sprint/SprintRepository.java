@@ -9,7 +9,6 @@ import java.util.Optional;
 
 @Repository
 public interface SprintRepository extends JpaRepository<Sprint, Long> {
-
-    Optional<Sprint> findSprintById(Long id);
-    Optional<List<Sprint>> findSprintBySoftwareProjectId(Long softwareProjectId);
+    Optional<Sprint> findSprintById(long id);
+    Optional<List<Sprint>> findSprintBySoftwareProjectId(long softwareProjectId);
 }

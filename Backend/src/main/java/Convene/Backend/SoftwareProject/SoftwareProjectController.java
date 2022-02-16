@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/software-project")
 public class SoftwareProjectController {
 
-    private SoftwareProjectService softwareProjectService;
+    private final SoftwareProjectService softwareProjectService;
 
     @Autowired
     public SoftwareProjectController(SoftwareProjectService softwareProjectService) {
@@ -30,5 +30,12 @@ public class SoftwareProjectController {
     @PreAuthorize("hasPermission(#projectId, 'MEMBER')")
     public SoftwareProjectDto getSoftwareProjectDetails(@PathVariable(name = "projectId") String projectId) {
         return softwareProjectService.getSoftwareProjectDto(Long.valueOf(projectId));
+    }
+
+
+    @GetMapping(path = "/{projectId}/issue-status")
+    public ResponseEntity<Object[]> getSoftwareProjectStatus(@PathVariable(name = "projectId") String projectId) throws Exception {
+        return new ResponseEntity<>(softwareProjectService.getProjectIssueStatuses(Long.valueOf(projectId)),
+                HttpStatus.ACCEPTED);
     }
 }

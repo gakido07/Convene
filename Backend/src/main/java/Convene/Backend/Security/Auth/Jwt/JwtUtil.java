@@ -17,7 +17,7 @@ import java.util.function.Function;
 @Component
 public class JwtUtil implements Serializable {
 
-    public static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60 * 60;
+    public static final long JWT_TOKEN_VALIDITY = 10 * 60 * 60 * 1000;
 
     @Value("${jwt.secret}")
     private String secret;
@@ -78,7 +78,7 @@ public class JwtUtil implements Serializable {
     }
 
 
-    public Boolean validateToken(String token, AppUser appUser){
+    public boolean validateToken(String token, AppUser appUser){
         final String email = getEmailFromToken(token);
         return (email.equals(appUser.getEmail()) && !isTokenExpired(token) &&
                 appUser.getId().toString().equals(getSpecificClaimFromToken(token, Claims::getId)));

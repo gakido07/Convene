@@ -10,7 +10,7 @@ import javax.validation.constraints.Email;
 public class EmailVerificationDto {
     @Email
     private String email;
-    private Boolean verified;
+    private boolean verified;
 
     @Data
     public static class EmailVerificationRequest {
@@ -22,6 +22,6 @@ public class EmailVerificationDto {
     public static class CodeValidationRequest {
         @Email
         private String email;
-        private Integer verificationCode;
+        private int verificationCode;
     }
 }

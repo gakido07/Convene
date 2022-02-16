@@ -1,6 +1,7 @@
 package Convene.Backend.SoftwareProject;
 
 import Convene.Backend.Models.Project;
+import Convene.Backend.SoftwareProject.Issue.CustomIssueStatus.CustomIssueStatus;
 import Convene.Backend.SoftwareProject.SoftwareProjectRole.SoftwareProjectRole;
 import Convene.Backend.SoftwareProject.Sprint.Sprint;
 import Convene.Backend.AppUser.AppUser;
@@ -10,6 +11,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -31,8 +33,9 @@ public class SoftwareProject extends Project{
             generator = "project_sequence"
     )
     @Getter
-    private Long id;
+    private long id;
 
+    @NotNull(message = "Software project name can't be null")
     private String name;
 
     private Date initiationDate;
@@ -52,6 +55,10 @@ public class SoftwareProject extends Project{
     private Set<Sprint> sprints;
 
     @Getter
+    @OneToMany(mappedBy = "softwareProject", cascade = CascadeType.ALL)
+    private Set<CustomIssueStatus> customIssueStatuses;
+
+    @Getter
     @ManyToMany
     @JoinTable(
             name = "project_team",
@@ -60,8 +67,6 @@ public class SoftwareProject extends Project{
     )
     private Set<AppUser> teamMembers;
 
-
-    //Constructor
     public SoftwareProject(SoftwareProjectDto.CreateSoftwareProjectRequest request, AppUser appUser) {
         this.name = request.getName();
         this.description = request.getDescription();
@@ -104,18 +109,6 @@ public class SoftwareProject extends Project{
     @Override
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public ProjectType getProjectType() {
-        return projectType;
-    }
-
-    public Set<SoftwareProjectRole> getRoles() {
-        return roles;
-    }
-
-    public Set<AppUser> getTeamMembers() {
-        return teamMembers;
     }
 
     public void addRole(SoftwareProjectRole role) {

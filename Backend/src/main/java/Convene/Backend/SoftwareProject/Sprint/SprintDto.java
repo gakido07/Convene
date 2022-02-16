@@ -12,7 +12,8 @@ public class SprintDto {
     @Data
     public static class CreateSprintRequest {
         private String name;
-        private Long softwareProjectId;
+        private long softwareProjectId;
+        private Date startDate;
         private Date endDate;
     }
 }
