@@ -1,17 +1,14 @@
 package Convene.Backend.Security.Auth.Jwt;
 
 import Convene.Backend.AppUser.AppUser;
-import Convene.Backend.AppUser.AppUserService;
+import Convene.Backend.AppUser.AppUserServiceImpl;
 import Convene.Backend.Exception.CustomExceptions.AuthExceptions;
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -22,9 +19,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @Configuration
 public class JwtRequestFilter extends OncePerRequestFilter {
@@ -33,12 +27,12 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     String token = "";
     final String userRoute = "/user/**/profile";
     private final List<String> skipFilterUrls = Arrays.asList("/auth/**");
-    private final AppUserService appUserService;
+    private final AppUserServiceImpl appUserServiceImpl;
     private final JwtUtil jwtUtil;
 
     @Autowired
-    public JwtRequestFilter(AppUserService appUserService, JwtUtil jwtUtil) {
-        this.appUserService = appUserService;
+    public JwtRequestFilter(AppUserServiceImpl appUserServiceImpl, JwtUtil jwtUtil) {
+        this.appUserServiceImpl = appUserServiceImpl;
         this.jwtUtil = jwtUtil;
     }
 
@@ -64,7 +58,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         }
 
         if(email.length() > 0 && SecurityContextHolder.getContext().getAuthentication() == null){
-            AppUser appUser = appUserService.findAppUserByEmail(email).orElseThrow(AuthExceptions.UserNotFoundException::new);
+            AppUser appUser = appUserServiceImpl.findAppUserByEmail(email);
             if(jwtUtil.validateToken(token, appUser) && userRouteProtection(request, appUser)){
                 UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
                         email,

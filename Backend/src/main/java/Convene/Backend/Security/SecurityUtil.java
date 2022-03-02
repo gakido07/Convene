@@ -1,6 +1,9 @@
 package Convene.Backend.Security;
 
+import Convene.Backend.AppUser.AppUser;
 import Convene.Backend.Security.Auth.AuthDto;
+import Convene.Backend.Security.Auth.Jwt.JwtUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -14,6 +17,13 @@ import java.util.stream.Collectors;
 
 @Configuration
 public class SecurityUtil {
+
+    private final JwtUtil jwtUtil;
+
+    @Autowired
+    public SecurityUtil(JwtUtil jwtUtil) {
+        this.jwtUtil = jwtUtil;
+    }
 
     public PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
@@ -53,5 +63,9 @@ public class SecurityUtil {
             }).collect(Collectors.toList());
         }
         return memberPrivileges;
+    }
+
+    public String generateToken(AppUser appUser) {
+        return jwtUtil.generateToken(appUser);
     }
 }

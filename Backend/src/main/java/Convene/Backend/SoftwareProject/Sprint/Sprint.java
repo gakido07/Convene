@@ -62,4 +62,8 @@ public class Sprint {
         this.startDate = startDate;
         this.endDate = endDate;
     }
+
+    public void addIssue(Issue issue) {
+        this.issues.add(issue);
+    }
 }

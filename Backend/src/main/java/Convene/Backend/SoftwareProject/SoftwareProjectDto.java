@@ -1,5 +1,6 @@
 package Convene.Backend.SoftwareProject;
 
+import Convene.Backend.AppUser.AppUser;
 import Convene.Backend.SoftwareProject.SoftwareProjectRole.SoftwareProjectRoleDto;
 import lombok.Data;
 
@@ -15,8 +16,7 @@ public class SoftwareProjectDto {
     @NotNull
     private String name;
     @NotNull
-    private Date initiationDate;
-    private Set<SoftwareProjectRoleDto> roles;
+    private AppUser owner;
     @NotNull
     private ProjectType type;
 
@@ -24,7 +24,7 @@ public class SoftwareProjectDto {
         this.id = softwareProject.getId();
         this.name = softwareProject.getName();
         this.type = softwareProject.getProjectType();
-        this.roles = softwareProject.getRoles().stream().map(SoftwareProjectRoleDto::new).collect(Collectors.toSet());
+        this.owner = softwareProject.getOwner();
     }
 
     @Data

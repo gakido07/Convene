@@ -1,28 +1,10 @@
 package Convene.Backend.SoftwareProject.SoftwareProjectRole;
 
-import Convene.Backend.Exception.CustomExceptions.SoftwareProjectRoleExceptions;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import Convene.Backend.AppUser.AppUser;
 
-@Service
-@Slf4j
-public class SoftwareProjectRoleService implements SoftwareProjectServiceImpl {
+public interface SoftwareProjectRoleService {
 
-    private final SoftwareProjectRoleRepository roleRepository;
+    SoftwareProjectRole findRoleById(long id);
 
-    @Autowired
-    public SoftwareProjectRoleService(SoftwareProjectRoleRepository softwareProjectRoleRepository) {
-        this.roleRepository = softwareProjectRoleRepository;
-    }
-
-    @Override
-    public SoftwareProjectRole findRoleById(long id) {
-        return roleRepository.findById(id).orElseThrow(SoftwareProjectRoleExceptions.SoftwareProjectRoleNotFoundException::new);
-    }
-
-    @Override
-    public void saveRole(SoftwareProjectRole role) {
-        roleRepository.save(role);
-    }
+    void saveRole(SoftwareProjectRole role);
 }

@@ -1,6 +1,8 @@
 package Convene.Backend.SoftwareProject.Sprint;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,7 +33,10 @@ public class SprintController {
 
     @DeleteMapping(path = "/sprint/{sprintId}")
     @PreAuthorize("hasPermission(#projectId, 'ADMIN')")
-    public Sprint deleteSprint(@PathVariable(name = "sprintId") long sprintId) throws Exception {
-        return sprintService.deleteSprint(sprintId);
+    public ResponseEntity<String> deleteSprint(@PathVariable(name = "sprintId") long sprintId) throws Exception {
+        sprintService.deleteSprintById(sprintId);
+        return new ResponseEntity<>(
+                "Deleted", HttpStatus.ACCEPTED
+        );
     }
 }

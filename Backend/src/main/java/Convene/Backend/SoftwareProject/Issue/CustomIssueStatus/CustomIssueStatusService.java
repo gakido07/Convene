@@ -1,11 +1,6 @@
 package Convene.Backend.SoftwareProject.Issue.CustomIssueStatus;
 
-import org.springframework.stereotype.Service;
+public interface CustomIssueStatusService {
 
-@Service
-public class CustomIssueStatusService implements CustomIssueStatusServiceimpl {
-    @Override
-    public CustomIssueStatus createCustomIssueStatus(CustomIssueStatusDto.CreateCustomIssueStatusRequest request) {
-        return null;
-    }
+    public CustomIssueStatus createCustomIssueStatus(CustomIssueStatusDto.CreateCustomIssueStatusRequest request);
 }

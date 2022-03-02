@@ -1,6 +1,7 @@
 package Convene.Backend.SoftwareProject.Issue;
 
 import Convene.Backend.SoftwareProject.Issue.SubIssue.SubIssue;
+import Convene.Backend.SoftwareProject.SoftwareProject;
 import Convene.Backend.SoftwareProject.Sprint.Sprint;
 import Convene.Backend.AppUser.AppUser;
 import lombok.AllArgsConstructor;
@@ -45,11 +46,15 @@ public class Issue {
     @Enumerated(EnumType.STRING)
     private Priority priority;
     @ManyToOne
-    @JoinColumn(name = "sprint", nullable = false, updatable = false)
+    @JoinColumn(name = "sprint", nullable = true)
     private Sprint sprint;
 
     @OneToMany(mappedBy = "issue", fetch = FetchType.EAGER)
     private Set<SubIssue> subIssues;
+
+    @ManyToOne
+    @JoinColumn(name = "software_project", nullable = false, updatable = false)
+    private SoftwareProject softwareProject;
 
     public enum IssueStatus {
         TODO, IN_PROGRESS, DONE
