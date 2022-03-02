@@ -4,20 +4,13 @@ import lombok.*;
 
 import java.util.List;
 
+@Getter @Setter
+@AllArgsConstructor
+@ToString
 public class AuthDto {
-    @Getter
-    @Setter
     private String email;
-
-    @Getter
-    @Setter
-    private String token;
-
-
-    public AuthDto(String email, String token) {
-        this.email = email;
-        this.token = token;
-    }
+    private String accessToken;
+    private String refreshToken;
 
 
     @Data

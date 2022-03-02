@@ -59,6 +59,9 @@ public class AppUser implements UserDetails {
     @ManyToMany(mappedBy = "teamMembers", fetch = FetchType.EAGER)
     private Set<SoftwareProjectRole> projectRoles;
 
+    @Getter @ManyToMany(mappedBy = "teamInvitees", fetch = FetchType.EAGER)
+    private Set<SoftwareProject> invites;
+
     public AppUser(AppUserDto.SignUpRequest signUpRequest) {
         this.email = signUpRequest.getEmail();
         this.firstName = signUpRequest.getFirstName();

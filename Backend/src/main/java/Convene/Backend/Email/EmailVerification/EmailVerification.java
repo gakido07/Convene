@@ -38,7 +38,7 @@ public class EmailVerification {
             message = "Validation code generated is out of range"
     )
     private int validationCode;
-    @Getter
+    @Getter @Setter
     boolean verified;
 
     public EmailVerification(String email) {

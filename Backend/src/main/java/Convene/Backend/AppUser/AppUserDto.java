@@ -32,6 +32,19 @@ public class AppUserDto {
         this.projects = appUser.getProjects().stream().map(SoftwareProjectDto::new).collect(Collectors.toSet());
     }
 
+    public static class AppUserIdentificationDto {
+        private String firstName;
+        private String lastName;
+        @Email
+        private String email;
+
+        public AppUserIdentificationDto(AppUser appUser) {
+            this.firstName = appUser.getFirstName();
+            this.lastName = appUser.getLastName();
+            this.email = appUser.getEmail();
+        }
+    }
+
     @Data
     public static class SignUpRequest {
         private String firstName;
@@ -48,6 +61,18 @@ public class AppUserDto {
         private String email;
         @NotNull
         private String password;
+    }
+
+    @AllArgsConstructor @Data
+    public static class ChangePasswordRequest {
+        private String currentPassword;
+        private String newPassword;
+    }
+
+    @AllArgsConstructor @Data
+    public static class LeaveProjectTeamRequest {
+        private long projectId;
+        private String userPassword;
     }
 
     public interface AppUserDtoProjection {

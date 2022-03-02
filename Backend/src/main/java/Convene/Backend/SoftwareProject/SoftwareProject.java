@@ -2,6 +2,7 @@ package Convene.Backend.SoftwareProject;
 
 import Convene.Backend.Models.Project;
 import Convene.Backend.SoftwareProject.Issue.CustomIssueStatus.CustomIssueStatus;
+import Convene.Backend.SoftwareProject.Issue.Issue;
 import Convene.Backend.SoftwareProject.SoftwareProjectRole.SoftwareProjectRole;
 import Convene.Backend.SoftwareProject.Sprint.Sprint;
 import Convene.Backend.AppUser.AppUser;
@@ -52,11 +53,24 @@ public class SoftwareProject extends Project{
 
     @Getter
     @OneToMany(mappedBy = "softwareProject", cascade = CascadeType.ALL)
+    private Set<Issue> issues;
+
+    @Getter
+    @OneToMany(mappedBy = "softwareProject", cascade = CascadeType.ALL)
     private Set<Sprint> sprints;
 
     @Getter
     @OneToMany(mappedBy = "softwareProject", cascade = CascadeType.ALL)
     private Set<CustomIssueStatus> customIssueStatuses;
+
+    @Getter @Setter
+    @ManyToMany
+    @JoinTable(
+            name = "project_invites",
+            joinColumns = @JoinColumn(name = "project_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private Set<AppUser> teamInvitees;
 
     @Getter
     @ManyToMany
@@ -67,18 +81,27 @@ public class SoftwareProject extends Project{
     )
     private Set<AppUser> teamMembers;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "app_user_id",
+    referencedColumnName = "id")
+
+    @Getter @Setter
+    private AppUser owner;
+
     public SoftwareProject(SoftwareProjectDto.CreateSoftwareProjectRequest request, AppUser appUser) {
         this.name = request.getName();
         this.description = request.getDescription();
         this.initiationDate = Date.valueOf(LocalDate.now());
         this.projectType = request.getType();
         this.roles = new HashSet<>();
-        this.teamMembers = new HashSet<AppUser>();
+        this.teamMembers = new HashSet<>();
+        this.teamInvitees = new HashSet<>();
         this.teamMembers.add(appUser);
         roles.add(new SoftwareProjectRole("ADMIN", this)
         .withAppUsers(
                 teamMembers
         ));
+        this.owner = appUser;
     }
 
     @Override
@@ -120,6 +143,19 @@ public class SoftwareProject extends Project{
 
     public void addTeamMember(AppUser teamMember) {
         this.teamMembers.add(teamMember);
+    }
+
+    public void addTeamInvitee(AppUser appUser) {
+        this.teamInvitees.add(appUser);
+    }
+
+    public void removeTeamInvitee(AppUser appUser) {
+        this.teamInvitees.remove(appUser);
+    }
+
+    public void receiveTeammateInvite(AppUser appUser) {
+        this.teamInvitees.remove(appUser);
+        this.teamMembers.add(appUser);
     }
 
 }
